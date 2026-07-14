@@ -197,6 +197,12 @@ const initializeBrowser = async () => {
       '--no-first-run',
       '--no-zygote',
       '--disable-gpu',
+      // Anti-bot / fingerprint evasion
+      '--disable-blink-features=AutomationControlled',
+      '--disable-features=IsolateOrigins,SitePerProcess',
+      '--disable-web-security',
+      '--window-size=1280,800',
+      '--start-maximized',
     ],
   });
 };
