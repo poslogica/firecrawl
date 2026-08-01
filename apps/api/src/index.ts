@@ -123,6 +123,14 @@ app.get("/", (_, res) => {
   });
 });
 
+app.get("/openapi.json", (_, res) => {
+  res.sendFile("openapi.json", { root: "." });
+});
+
+app.get("/openapi-v0.json", (_, res) => {
+  res.sendFile("openapi-v0.json", { root: "." });
+});
+
 app.get("/e2e-test", (_, res) => {
   res.status(200).send("OK");
 });
