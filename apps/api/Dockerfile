@@ -97,6 +97,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/native ./native
 COPY --from=build /app/BUILD_SHA ./BUILD_SHA
+COPY --from=build /app/openapi.json ./openapi.json
+COPY --from=build /app/openapi-v0.json ./openapi-v0.json
 
 # Copy Go shared library
 COPY --from=go-build /app/sharedLibs/go-html-to-md/libhtml-to-markdown.so ./sharedLibs/go-html-to-md/
