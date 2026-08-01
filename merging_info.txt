@@ -1,0 +1,13 @@
+# Process to merge from firecrawl/firecrawl into local branch
+
+# 1. Add the upstream remote
+git remote add upstream https://github.com/firecrawl/firecrawl.git
+
+# 2. Fetch the upstream changes
+git fetch upstream
+
+# 3. Merge the upstream main branch into your current branch
+git merge upstream/main
+
+# 4. Push to your origin (if needed)
+git push origin main
