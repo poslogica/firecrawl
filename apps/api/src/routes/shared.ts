@@ -29,6 +29,9 @@ import {
   CREDITS_FEATURE_ID,
 } from "../services/autumn/autumn.service";
 import { getTeamBalance } from "../services/autumn/usage";
+import { getThirdPartyDataTermsRequiredResponse } from "../lib/exchange";
+import { getExchangeAccessForRequestBody } from "../lib/exchange-request";
+import { getScrapeZDR } from "../lib/zdr-helpers";
 
 export function checkCreditsMiddleware(
   _minimum?: number,
@@ -72,10 +75,10 @@ export function checkCreditsMiddleware(
           }
 
           // Enforce 50-credit cap for unverified agent keys. Autumn is the
-          // source of truth for credit usage now (not ACUC.adjusted_credits_used):
-          // getTeamBalance().usage is the team's credits used this period. If
-          // Autumn is unavailable we fail open (skip the cap), matching the
-          // Autumn-outage behavior of the main credit check below.
+          // source of truth for credit usage: getTeamBalance().usage is the
+          // team's credits used this period. If Autumn is unavailable we fail
+          // open (skip the cap), matching the Autumn-outage behavior of the
+          // main credit check below.
           const UNVERIFIED_CREDIT_LIMIT = 50;
           let unverifiedCreditsUsed: number | null = null;
           try {
@@ -143,6 +146,7 @@ export function checkCreditsMiddleware(
         properties: {
           source: "checkCreditsMiddleware",
           path: req.path,
+          apiKeyId: req.acuc?.api_key_id ?? null,
         },
         featureId,
       });
@@ -254,13 +258,6 @@ export function authMiddleware(
 
       req.auth = { team_id, org_id };
       req.acuc = chunk ?? undefined;
-      if (chunk) {
-        req.account = {
-          remainingCredits: chunk.price_should_be_graceful
-            ? chunk.remaining_credits + chunk.price_credits
-            : chunk.remaining_credits,
-        };
-      }
       next();
     })().catch(err => next(err));
   };
@@ -291,21 +288,72 @@ export function blocklistMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  if (
-    typeof req.body.url === "string" &&
-    isUrlBlocked(req.body.url, req.acuc?.flags ?? null, {
-      team_id: req.acuc?.team_id ?? null,
-      origin: typeof req.body.origin === "string" ? req.body.origin : null,
-    })
-  ) {
-    if (!res.headersSent) {
-      return res.status(403).json({
-        success: false,
-        error: UNSUPPORTED_SITE_MESSAGE,
-      });
+  return blocklistGate(req, res, next, { exchange: false });
+}
+
+/**
+ * Blocklist gate for single-URL scrape-shaped routes (scrape, crawl), where
+ * an Exchange-eligible URL may bypass the blocklist because the exchange
+ * engine can serve it. Everything else (map, search, batch scrape, monitors)
+ * keeps plain blocklist behavior - batch stays out until its jobs carry the
+ * access flags the worker-side recheck needs.
+ */
+export function scrapeBlocklistMiddleware(
+  req: RequestWithMaybeACUC<any, any, any>,
+  res: Response,
+  next: NextFunction,
+) {
+  return blocklistGate(req, res, next, { exchange: true });
+}
+
+function blocklistGate(
+  req: RequestWithMaybeACUC<any, any, any>,
+  res: Response,
+  next: NextFunction,
+  options: { exchange: boolean },
+) {
+  (async () => {
+    const zeroDataRetention =
+      getScrapeZDR(req.acuc?.flags) === "forced" ||
+      req.body?.zeroDataRetention === true;
+    const exchangeAccess =
+      options.exchange &&
+      typeof req.body.url === "string" &&
+      (await getExchangeAccessForRequestBody({
+        body: req.body,
+        flags: req.acuc?.flags ?? null,
+        url: req.body.url,
+        zeroDataRetention,
+      }));
+    const canUseExchange =
+      typeof exchangeAccess === "object" && exchangeAccess.allowed;
+
+    if (typeof exchangeAccess === "object" && exchangeAccess.termsRequired) {
+      if (!res.headersSent) {
+        return res
+          .status(403)
+          .json(getThirdPartyDataTermsRequiredResponse(exchangeAccess.terms));
+      }
     }
-  }
-  next();
+
+    if (
+      typeof req.body.url === "string" &&
+      !canUseExchange &&
+      isUrlBlocked(req.body.url, req.acuc?.flags ?? null, {
+        team_id: req.acuc?.team_id ?? null,
+        org_id: req.acuc?.org_id ?? null,
+        origin: typeof req.body.origin === "string" ? req.body.origin : null,
+      })
+    ) {
+      if (!res.headersSent) {
+        return res.status(403).json({
+          success: false,
+          error: UNSUPPORTED_SITE_MESSAGE,
+        });
+      }
+    }
+    next();
+  })().catch(err => next(err));
 }
 
 export function countryCheck(

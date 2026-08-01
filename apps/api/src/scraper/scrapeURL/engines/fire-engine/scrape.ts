@@ -51,6 +51,7 @@ export type FireEngineScrapeRequestCommon = {
   mobileProxy?: boolean; // leave it undefined if user doesn't specify
 
   timeout?: number;
+  maxAge?: number;
   saveScrapeResultToGCS?: boolean;
   zeroDataRetention?: boolean;
 };
@@ -60,6 +61,8 @@ export type FireEngineScrapeRequestChromeCDP = {
   skipTlsVerification?: boolean;
   actions?: InternalAction[];
   blockMedia?: boolean;
+  /** Opt out of render-engine routing (blockMedia: false normally forces it). */
+  forceNonRender?: boolean;
   mobile?: boolean;
   disableSmartWaitCache?: boolean;
   persistentStorage?: { uniqueId: string };
@@ -76,6 +79,7 @@ const successSchema = z.object({
 
   timeTaken: z.number(),
   content: z.string(),
+  json: z.unknown().optional(),
   url: z.string().optional(),
 
   pageStatusCode: z.number(),
@@ -83,6 +87,7 @@ const successSchema = z.object({
 
   // TODO: this needs to be non-optional, might need fixes on f-e side to ensure reliability
   responseHeaders: z.record(z.string(), z.string()).optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
 
   // timeTakenCookie: z.number().optional(),
   // timeTakenRequest: z.number().optional(),

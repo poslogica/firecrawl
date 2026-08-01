@@ -27,13 +27,14 @@ import { captureExceptionWithZdrCheck } from "../../services/sentry";
 import type { BillingMetadata } from "../../services/billing/types";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 import {
-  KEYLESS_CREDITS_MESSAGE,
+  KEYLESS_FREE_TIER_LIMIT_MESSAGE,
   adjustKeylessCredits,
   logKeylessCreditUsage,
   reserveKeylessCredits,
 } from "../../lib/keyless";
 import { projectScrapeCredits } from "../../lib/keyless-credit-projection";
 import { applyAgentAuthDiscoveryHeader } from "../../lib/agent-auth-discovery";
+import { getEffectiveConcurrencyLimit } from "../../lib/concurrency-limit";
 import path from "node:path";
 
 const AGENT_INTEROP_CONCURRENCY_BOOST = 3;
@@ -379,7 +380,7 @@ export async function parseController(
           applyAgentAuthDiscoveryHeader(res);
           return res.status(429).json({
             success: false,
-            error: KEYLESS_CREDITS_MESSAGE,
+            error: KEYLESS_FREE_TIER_LIMIT_MESSAGE,
           });
         }
         reservedKeylessCredits = projectedKeylessCredits;
@@ -448,7 +449,10 @@ export async function parseController(
         }
         req.on("close", () => aborter.abort());
 
-        const baseConcurrency = req.acuc?.concurrency || 1;
+        const baseConcurrency = await getEffectiveConcurrencyLimit(
+          req.auth.team_id,
+          req.acuc?.org_id,
+        );
         const concurrency = boostConcurrency
           ? baseConcurrency * AGENT_INTEROP_CONCURRENCY_BOOST
           : baseConcurrency;
@@ -512,6 +516,8 @@ export async function parseController(
                       bypassBilling: isDirectToBullMQ || !shouldBill,
                       zeroDataRetention,
                       teamFlags: req.acuc?.flags ?? null,
+                      orgId: req.acuc?.org_id ?? null,
+                      teamConcurrency: baseConcurrency,
                       uploadedFile: file,
                       forceEngine,
                       isParse: true,

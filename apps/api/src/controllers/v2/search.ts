@@ -8,13 +8,17 @@ import {
 } from "./types";
 import { billTeam } from "../../services/billing/credit_billing";
 import {
-  KEYLESS_CREDITS_MESSAGE,
+  KEYLESS_FREE_TIER_LIMIT_MESSAGE,
   adjustKeylessCredits,
   logKeylessCreditUsage,
   reserveKeylessCredits,
 } from "../../lib/keyless";
 import { v7 as uuidv7 } from "uuid";
-import { logSearch, logRequest } from "../../services/logging/log_job";
+import {
+  logSearch,
+  logRequest,
+  logResearchEndpoint,
+} from "../../services/logging/log_job";
 import { logger as _logger } from "../../lib/logger";
 import { ScrapeJobTimeoutError } from "../../lib/error";
 import { z } from "zod";
@@ -28,6 +32,15 @@ import type { BillingMetadata } from "../../services/billing/types";
 import { getSearchForcedKind, getSearchZDR } from "../../lib/zdr-helpers";
 import { projectSearchTotalCredits } from "../../lib/keyless-credit-projection";
 import { applyAgentAuthDiscoveryHeader } from "../../lib/agent-auth-discovery";
+import { resolveThreatProtection } from "../../lib/threat-protection/request";
+import {
+  actionTypesOf,
+  checkKeyEndpointRestriction,
+  checkKeyFormatRestriction,
+  formatTypesOf,
+} from "../../lib/key-restriction";
+import { wantsDeveloperCategory } from "../../search/developer";
+import { requestOrigin } from "../../lib/request-origin";
 
 export async function searchController(
   req: RequestWithAuth<{}, SearchResponse, SearchRequest>,
@@ -59,7 +72,63 @@ export async function searchController(
   let reconciledKeylessCredits = false;
 
   try {
+    const rawOrigin =
+      typeof req.body?.origin === "string" ? req.body.origin : undefined;
     req.body = searchRequestSchema.parse(req.body);
+
+    // Beta gate: the developer category is limited to teams with the
+    // developerBeta flag. Fail closed and silent — an unentitled team gets
+    // normal web results with the category dropped, no error. Keyless callers
+    // have no org and so no flags, which makes them unentitled. Runs before
+    // the key-restriction check below so an unentitled team is never told its
+    // key lacks access to a category that is about to be removed anyway.
+    if (wantsDeveloperCategory(req.body.categories as CategoryOption[])) {
+      if (req.acuc?.flags?.developerBeta !== true) {
+        // Expected, high-volume path (keyless + unentitled teams) — left
+        // unlogged on purpose to avoid log spam. See PR discussion.
+        // filter() widens the union that categories is declared as (either an
+        // all-string or an all-object array), so the result is cast back to
+        // assign it.
+        req.body.categories = (req.body.categories as CategoryOption[]).filter(
+          category =>
+            typeof category === "string"
+              ? category !== "developer"
+              : category.type !== "developer",
+        ) as typeof req.body.categories;
+      }
+    }
+
+    const requestedFormats = formatTypesOf(req.body.scrapeOptions?.formats);
+    const keyRestriction = await checkKeyFormatRestriction(
+      requestedFormats,
+      // Search only scrapes (and only runs actions) when formats are
+      // requested; without them scrapeOptions is ignored entirely.
+      requestedFormats.length > 0
+        ? actionTypesOf(req.body.scrapeOptions?.actions)
+        : [],
+      req.acuc?.api_key_id,
+      req.acuc?.flags ?? null,
+    );
+    if (!keyRestriction.allowed) {
+      return res.status(keyRestriction.status).json({
+        success: false,
+        error: keyRestriction.error,
+      });
+    }
+
+    if (wantsDeveloperCategory(req.body.categories as CategoryOption[])) {
+      const developerRestriction = await checkKeyEndpointRestriction(
+        "/v2/developer/search",
+        req.acuc?.api_key_id,
+        req.acuc?.flags ?? null,
+      );
+      if (!developerRestriction.allowed) {
+        return res.status(developerRestriction.status).json({
+          success: false,
+          error: developerRestriction.error,
+        });
+      }
+    }
 
     if (
       req.body.__agentInterop &&
@@ -74,6 +143,23 @@ export async function searchController(
       return res.status(403).json({
         success: false,
         error: "Agent interop is not enabled.",
+      });
+    }
+
+    // Threat protection: resolve the effective policy. Blocked domains are
+    // removed from search results entirely, and scraped results inherit the
+    // policy through the scrape pipeline.
+    const threatProtection = await resolveThreatProtection({
+      teamId: req.auth.team_id,
+      orgId: req.acuc?.org_id ?? null,
+      flags: req.acuc?.flags ?? null,
+      override:
+        req.body.threatProtection ?? req.body.scrapeOptions?.threatProtection,
+    });
+    if (threatProtection.error) {
+      return res.status(403).json({
+        success: false,
+        error: threatProtection.error,
       });
     }
 
@@ -151,7 +237,7 @@ export async function searchController(
         applyAgentAuthDiscoveryHeader(res);
         return res.status(429).json({
           success: false,
-          error: KEYLESS_CREDITS_MESSAGE,
+          error: KEYLESS_FREE_TIER_LIMIT_MESSAGE,
         });
       }
       reservedKeylessCredits = projectedKeylessCredits;
@@ -177,7 +263,9 @@ export async function searchController(
       },
       {
         teamId: req.auth.team_id,
+        orgId: req.acuc?.org_id ?? null,
         origin: req.body.origin,
+        integration: req.body.integration,
         apiKeyId: req.acuc?.api_key_id ?? null,
         flags: req.acuc?.flags ?? null,
         requestId: agentRequestId ?? jobId,
@@ -188,6 +276,7 @@ export async function searchController(
         billing,
         agentIndexOnly: (req as any).agentIndexOnly ?? false,
         keylessReserved: reservedKeylessCredits > 0,
+        threatProtectionPolicy: threatProtection.policy,
       },
       logger,
     );
@@ -196,14 +285,15 @@ export async function searchController(
     if (!isSearchPreview && shouldBill) {
       billTeam(
         req.auth.team_id,
-        req.acuc?.sub_id ?? undefined,
         result.searchCredits,
         req.acuc?.api_key_id ?? null,
         billing,
       ).catch(error =>
-        logger.error(
-          `Failed to bill team ${req.acuc?.sub_id} for ${result.searchCredits} credits: ${error}`,
-        ),
+        logger.error("Failed to bill team for search credits", {
+          teamId: req.auth.team_id,
+          searchCredits: result.searchCredits,
+          error,
+        }),
       );
     }
 
@@ -238,6 +328,33 @@ export async function searchController(
       },
       false,
     );
+
+    if (wantsDeveloperCategory(req.body.categories as CategoryOption[])) {
+      logResearchEndpoint({
+        table: "code_searches",
+        id: uuidv7(),
+        request_id: agentRequestId ?? jobId,
+        team_id: req.auth.team_id,
+        target: req.body.query,
+        options: {
+          origin: requestOrigin({ origin: rawOrigin }, req),
+          integration: req.body.integration ?? null,
+          api_version: "v2",
+          categories: req.body.categories,
+          via: "search_category",
+        },
+        response: null,
+        num_results: result.response.developer?.length ?? 0,
+        time_taken: timeTakenInSeconds,
+        credits_cost: 0,
+        is_successful: true,
+        zeroDataRetention,
+      }).catch(ledgerError => {
+        logger.warn("Failed to log developer category usage", {
+          error: ledgerError,
+        });
+      });
+    }
 
     const totalRequestTime = new Date().getTime() - middlewareStartTime;
     const controllerTime = new Date().getTime() - controllerStartTime;

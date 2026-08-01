@@ -17,7 +17,11 @@ import { isKeylessIpSuspicious } from "./spur";
 const KEYLESS_REQUESTS_PER_DAY = config.KEYLESS_REQUESTS_PER_DAY;
 const KEYLESS_CREDITS_PER_DAY = config.KEYLESS_CREDITS_PER_DAY;
 
-export const KEYLESS_CREDITS_MESSAGE = `You've reached today's limit of free, unauthenticated credits for Firecrawl. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
+// Shared 429 copy for both keyless request-cap and credit-cap failures.
+export const KEYLESS_FREE_TIER_LIMIT_MESSAGE = `You've hit Firecrawl's keyless free tier rate limit. To continue now, create a free API key at https://www.firecrawl.dev/signin.
+
+Then authenticate with:
+Authorization: Bearer YOUR_API_KEY`;
 
 // The tier is "configured" when BOTH limits are set — even to 0. Unset means the
 // feature is off (callers get a plain Unauthorized); 0 means it's on but the
@@ -210,8 +214,8 @@ return next
 
 /**
  * Read-only check of whether an IP could currently use the keyless tier (no
- * consumption). Used by the hosted MCP to decide, at connect time, whether to
- * serve keyless (eligible) or throw so FastMCP emits the OAuth challenge (not).
+ * consumption). Used by the hosted MCP before a keyless tool call so an
+ * ineligible caller receives structured recovery without an OAuth challenge.
  */
 export async function checkKeylessEligibility(
   ip: string,
@@ -221,8 +225,8 @@ export async function checkKeylessEligibility(
     return { eligible: false, reason: "ineligible_ip" };
   }
   // Optional Spur Context check (only when SPUR_API_KEY is set): treat IPs on
-  // anonymizing/rotating infrastructure as ineligible so the hosted MCP issues
-  // an OAuth challenge instead of serving keyless that auth would then reject.
+  // anonymizing/rotating infrastructure as ineligible so the hosted MCP can
+  // return a bounded recovery result instead of serving a request auth rejects.
   if (await isKeylessIpSuspicious(ip)) {
     return { eligible: false, reason: "suspicious" };
   }
@@ -243,8 +247,8 @@ export async function checkKeylessEligibility(
     }
     return { eligible: true };
   } catch {
-    // Limiter store unavailable — fail closed so the MCP issues an OAuth
-    // challenge rather than granting unbounded keyless.
+    // Limiter store unavailable — fail closed so the MCP returns structured
+    // recovery rather than granting unbounded keyless access.
     return { eligible: false, reason: "error" };
   }
 }

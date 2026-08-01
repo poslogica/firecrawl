@@ -28,6 +28,8 @@ import {
 import { BrandingProfile } from "../../types/branding";
 import { ProductProfile } from "../../types/product";
 import { MenuProfile } from "../../types/menu";
+import { threatProtectionOverrideSchema } from "../../lib/threat-protection/config";
+import { auditMetadataSchema } from "../../lib/siem-logging/types";
 
 // Base URL schema with common validation logic
 export const URL = z.preprocess(
@@ -692,6 +694,10 @@ const baseScrapeOptions = z.strictObject({
   storeInCache: z.boolean().prefault(true),
   lockdown: z.boolean().prefault(false),
   redactPII: redactPIISchema,
+  // Enterprise: per-request field-level override of the org's threat
+  // protection policy. Gated on the team flag + org config (checkPermissions).
+  threatProtection: threatProtectionOverrideSchema.optional(),
+  auditMetadata: auditMetadataSchema.optional(),
 
   profile: z
     .object({
@@ -880,6 +886,7 @@ const extractOptions = z
     __experimental_showCostTracking: z.boolean().prefault(false),
     ignoreInvalidURLs: z.boolean().prefault(true),
     webhook: webhookSchema.optional(),
+    threatProtection: threatProtectionOverrideSchema.optional(),
   })
   .refine(obj => obj.urls || obj.prompt, {
     error: "Either 'urls' or 'prompt' must be provided.",
@@ -940,6 +947,8 @@ export const agentRequestSchema = z.strictObject({
 
   overrideWhitelist: z.string().optional(),
   model: z.enum(["spark-1-pro", "spark-1-mini"]).default("spark-1-pro"),
+  threatProtection: threatProtectionOverrideSchema.optional(),
+  auditMetadata: auditMetadataSchema.optional(),
 });
 
 export type AgentRequest = z.infer<typeof agentRequestSchema>;
@@ -1191,6 +1200,8 @@ const mapRequestSchemaBase = crawlerOptions
     ignoreCache: z.boolean().prefault(false),
     location: locationSchema,
     headers: z.record(z.string(), z.string()).optional(),
+    threatProtection: threatProtectionOverrideSchema.optional(),
+    auditMetadata: auditMetadataSchema.optional(),
   });
 
 export const mapRequestSchema = strictWithMessage(mapRequestSchemaBase);
@@ -1302,6 +1313,7 @@ export type Document = {
     scrapeId?: string;
     error?: string;
     numPages?: number;
+    totalPages?: number;
     contentType?: string;
     timezone?: string;
     proxyUsed: "basic" | "stealth";
@@ -1377,6 +1389,7 @@ export interface URLTrace {
 
 export interface ExtractResponse {
   success: boolean;
+  code?: ErrorCodes;
   error?: string;
   data?: any;
   scrape_id?: string;
@@ -1533,6 +1546,8 @@ type Account = {
 export type TeamFlags = {
   ignoreRobots?: "disabled" | "allowed" | "forced";
   customRobotsAgent?: "disabled" | "allowed";
+  threatProtection?: "disabled" | "allowed" | "forced";
+  siemLogging?: boolean;
   unblockedDomains?: string[];
   forceZDR?: boolean;
   allowZDR?: boolean;
@@ -1542,12 +1557,30 @@ export type TeamFlags = {
   checkRobotsOnScrape?: boolean;
   crawlTtlHours?: number;
   ipWhitelist?: boolean;
+  // gates the per-team API key IP allowlist (ip_restriction_config table)
+  ipRestriction?: boolean;
+  // gates the per-key scope/format lockdown (key_restriction_config table)
+  keyRestriction?: boolean;
   bypassCreditChecks?: boolean;
   debugBranding?: boolean;
   maxBrowserSessions?: number;
   researchBeta?: boolean;
-  highlightsBeta?: boolean;
   menuBeta?: boolean;
+  enrichBeta?: boolean;
+  developerBeta?: boolean;
+  professionalProfileCompanyDataBeta?: boolean;
+  organizationDataSourceAccess?: Record<
+    string,
+    {
+      status?: "enabled" | "disabled" | "suspended" | string | null;
+      termsKey?: string | null;
+      termsVersion?: string | null;
+      termsAcceptedAt?: string | null;
+      enabledAt?: string | null;
+      disabledAt?: string | null;
+      disabledReason?: string | null;
+    }
+  >;
 } | null;
 
 interface RequestWithMaybeACUC<
@@ -1636,6 +1669,7 @@ function fromV0CrawlerOptions(
     internalOptions: {
       v0CrawlOnlyUrls: x.returnOnlyUrls,
       teamId,
+      orgId: null,
     },
   };
 }
@@ -1700,6 +1734,7 @@ export function fromV0ScrapeOptions(
       atsv: pageOptions.atsv,
       v0DisableJsDom: pageOptions.disableJsDom,
       teamId,
+      orgId: null,
       ...(extractorOptions !== undefined &&
       extractorOptions.mode.includes("llm-extraction")
         ? {
@@ -1812,6 +1847,7 @@ export function fromV1ScrapeOptions(
     }),
     internalOptions: {
       teamId,
+      orgId: null,
       v1Agent: v1ScrapeOptions.agent,
       v1JSONSystemPrompt: (
         v1ScrapeOptions.jsonOptions || v1ScrapeOptions.extract
@@ -1874,6 +1910,53 @@ const pdfCategoryOptions = z.strictObject({
   type: z.literal("pdf"),
 });
 
+const developerCategoryOptions = z.strictObject({
+  type: z.literal("developer"),
+});
+
+const developerCategoryAliases = new Set([
+  "repo",
+  "code",
+  "developer",
+  "docs",
+  "devdex",
+  "repo_search",
+  "developer_index",
+]);
+
+function isDeveloperCategoryAlias(value: unknown): value is string {
+  return typeof value === "string" && developerCategoryAliases.has(value);
+}
+
+function normalizeDeveloperCategoryAliases(value: unknown): unknown {
+  if (!Array.isArray(value)) return value;
+  let seenString = false;
+  let seenObject = false;
+  const normalized: unknown[] = [];
+  for (const category of value) {
+    if (isDeveloperCategoryAlias(category)) {
+      if (seenString) continue;
+      seenString = true;
+      normalized.push("developer");
+    } else if (
+      typeof category === "object" &&
+      category !== null &&
+      isDeveloperCategoryAlias((category as { type?: unknown }).type)
+    ) {
+      if (Object.keys(category).length === 1) {
+        if (seenObject) continue;
+        seenObject = true;
+        normalized.push({ type: "developer" });
+      } else {
+        normalized.push({ ...category, type: "developer" });
+      }
+    } else {
+      normalized.push(category);
+    }
+  }
+  return normalized;
+}
+
 const searchDomainSchema = z
   .string()
   .trim()
@@ -1908,18 +1991,20 @@ export const searchRequestSchema = z
       .optional()
       .prefault(["web"]),
     categories: z
-      .union([
-        // Array of strings (simple format)
-        z.array(z.enum(["github", "research", "pdf"])),
-        // Array of objects (advanced format)
-        z.array(
-          z.union([
-            githubCategoryOptions,
-            researchCategoryOptions,
-            pdfCategoryOptions,
-          ]),
-        ),
-      ])
+      .preprocess(
+        normalizeDeveloperCategoryAliases,
+        z.union([
+          z.array(z.enum(["github", "research", "pdf", "developer"])),
+          z.array(
+            z.union([
+              githubCategoryOptions,
+              researchCategoryOptions,
+              pdfCategoryOptions,
+              developerCategoryOptions,
+            ]),
+          ),
+        ]),
+      )
       .optional(),
     includeDomains: z.array(searchDomainSchema).optional(),
     excludeDomains: z.array(searchDomainSchema).optional(),
@@ -1932,11 +2017,12 @@ export const searchRequestSchema = z
     timeout: z.int().positive().finite().prefault(60000),
     ignoreInvalidURLs: z.boolean().optional().prefault(false),
     asyncScraping: z.boolean().optional().prefault(false),
-    // Experimental: replace each result's snippet with query-relevant
-    // highlights pulled from our index (last 30 days), out-of-line from
-    // scrapeURL. Falls back to the provider snippet when the URL isn't indexed.
-    highlights: z.boolean().optional().prefault(false),
+    // Replace each result's snippet with query-relevant highlights pulled from
+    // our index. When omitted, the caller integration and rollout cohort decide
+    // whether generated highlights are returned or only run in shadow mode.
+    highlights: z.boolean().optional(),
     __searchPreviewToken: z.string().optional(),
+    threatProtection: threatProtectionOverrideSchema.optional(),
     scrapeOptions: baseScrapeOptions
       .extend({
         formats: z
@@ -2049,6 +2135,10 @@ export const searchRequestSchema = z
             case "pdf":
               return {
                 type: "pdf" as const,
+              };
+            case "developer":
+              return {
+                type: "developer" as const,
               };
             default:
               return { type: c as any };
