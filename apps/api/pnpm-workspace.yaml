@@ -50,6 +50,7 @@ patchedDependencies:
   "node-fetch@2.7.0": "patches/node-fetch@2.7.0.patch"
 allowBuilds:
   "@mendable/firecrawl-rs": true
+  "@scarf/scarf": false
   "@sentry-internal/node-cpu-profiler": true
   "@sentry/cli": true
   bigint-buffer: true
