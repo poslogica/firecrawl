@@ -2,12 +2,16 @@
     "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
     "low": true,
     "allowlist": [
-        // GHSA-v2v4-37r5-5v8g (ip-address):
-        // geoip-country 5.0.202607250106 still depends on ip-address 6.x; the
-        // non-affected line is a multi-major jump outside the upstream range.
-        // Do not override across majors without compatibility approval.
+        // GHSA-v2v4-37r5-5v8g / GHSA-mwp4-54f8-5fhr (ip-address):
+        // geoip-country (latest: 5.0.202608010109) still depends on ip-address
+        // ^6.4.0; the non-affected line (>=10.1.1 / >=10.3.1) is a multi-major
+        // jump outside the upstream range. Do not override across majors
+        // without compatibility approval. Both advisories share this root
+        // cause and only affect the country-lookup path (routes/shared.ts),
+        // not SSRF defenses (safeFetch.ts uses the separate ipaddr.js package).
         // Owner: team-engineering-reviewers. Tracking: create internal ticket.
-        // Expires: 2026-08-03.
-        "GHSA-v2v4-37r5-5v8g"
+        // Expires: 2026-09-03.
+        "GHSA-v2v4-37r5-5v8g",
+        "GHSA-mwp4-54f8-5fhr"
     ]
 }

@@ -27,13 +27,15 @@ overrides:
   "bn.js@<5.2.3": ">=5.2.3"
   "@tootallnate/once@<3.0.1": ">=3.0.1"
   yauzl: "^3.2.1"
-  undici: "7.28.0"
+  undici: "7.29.0"
   "picomatch@<4.0.4": ">=4.0.4"
   "yaml@<2.8.3": ">=2.8.3"
   "smol-toml@<1.6.1": ">=1.6.1"
+  "fast-uri@<3.1.5": ">=3.1.5 <4.0.0"
+  "postcss@<8.5.23": ">=8.5.23 <9.0.0"
   handlebars: ">=4.7.9"
   "path-to-regexp@~0.1.12": "0.1.13"
-  "brace-expansion@>=5.0.0 <5.0.8": "5.0.8"
+  "brace-expansion@>=5.0.0 <5.0.9": "5.0.9"
   "ws@>=7.0.0 <7.5.11": "7.5.11"
   "ws@>=8.0.0 <8.21.0": "8.21.0"
   "form-data@>=2.0.0 <2.5.6": "2.5.6"
@@ -50,6 +52,7 @@ patchedDependencies:
   "node-fetch@2.7.0": "patches/node-fetch@2.7.0.patch"
 allowBuilds:
   "@mendable/firecrawl-rs": true
+  "@scarf/scarf": false
   "@sentry-internal/node-cpu-profiler": true
   "@sentry/cli": true
   bigint-buffer: true
