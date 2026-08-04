@@ -5,7 +5,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
 
-RUN corepack enable && corepack prepare pnpm@11.4.0 --activate
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 
 # Build Go shared library
 FROM golang:1.24 AS go-build
@@ -74,7 +74,6 @@ FROM base AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    git \
     procps \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -87,22 +86,27 @@ RUN ARCH=$(dpkg --print-architecture) && \
       "https://github.com/apple/foundationdb/releases/download/${FDB_VERSION}/foundationdb-clients_${FDB_VERSION}-1_${FDB_ARCH}.deb" && \
     dpkg -i /tmp/fdb-clients.deb && rm /tmp/fdb-clients.deb
 
+RUN groupadd --system --gid 1001 firecrawl && \
+    useradd --system --uid 1001 --gid firecrawl --create-home --shell /usr/sbin/nologin firecrawl
+
 EXPOSE 8080
 WORKDIR /app
 ARG GIT_SHA=unknown
 ENV FIRECRAWL_BUILD_SHA=$GIT_SHA
 
 # Copy built application
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/native ./native
-COPY --from=build /app/BUILD_SHA ./BUILD_SHA
-COPY --from=build /app/openapi.json ./openapi.json
-COPY --from=build /app/openapi-v0.json ./openapi-v0.json
+COPY --from=build --chown=firecrawl:firecrawl /app/node_modules ./node_modules
+COPY --from=build --chown=firecrawl:firecrawl /app/dist ./dist
+COPY --from=build --chown=firecrawl:firecrawl /app/native ./native
+COPY --from=build --chown=firecrawl:firecrawl /app/BUILD_SHA ./BUILD_SHA
+COPY --from=build --chown=firecrawl:firecrawl /app/openapi.json ./openapi.json
+COPY --from=build --chown=firecrawl:firecrawl /app/openapi-v0.json ./openapi-v0.json
 
 # Copy Go shared library
-COPY --from=go-build /app/sharedLibs/go-html-to-md/libhtml-to-markdown.so ./sharedLibs/go-html-to-md/
+COPY --from=go-build --chown=firecrawl:firecrawl /app/sharedLibs/go-html-to-md/libhtml-to-markdown.so ./sharedLibs/go-html-to-md/
 
 RUN node -e 'const fs = require("fs"); for (const p of ["dist/src/harness.js", "dist/src/controllers/v0/crawl-status.js", "BUILD_SHA"]) { if (!fs.statSync(p).size) throw new Error(`${p} missing or empty`); }'
+
+USER firecrawl
 
 CMD ["node", "dist/src/harness.js", "--start-docker"]
