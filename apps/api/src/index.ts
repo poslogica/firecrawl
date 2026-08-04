@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/node";
 import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
 import {
   getGenerateLlmsTxtQueue,
   getDeepResearchQueue,
@@ -130,6 +131,17 @@ app.get("/openapi.json", (_, res) => {
 app.get("/openapi-v0.json", (_, res) => {
   res.sendFile("openapi-v0.json", { root: "." });
 });
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(undefined, {
+    swaggerOptions: {
+      url: "/openapi.json",
+    },
+    customSiteTitle: "Firecrawl API Documentation",
+  }),
+);
 
 app.get("/e2e-test", (_, res) => {
   res.status(200).send("OK");
