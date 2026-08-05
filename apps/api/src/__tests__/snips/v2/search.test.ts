@@ -3,6 +3,7 @@ import {
   describeIf,
   HAS_PROXY,
   HAS_SEARCH,
+  HAS_TOR,
   TEST_PRODUCTION,
 } from "../lib";
 import { search, searchWithFailure, idmux, Identity } from "./lib";
@@ -113,6 +114,43 @@ describeIf(TEST_PRODUCTION || HAS_SEARCH || HAS_PROXY)("Search tests", () => {
       }
 
       expect(markdownCount).toBeGreaterThan(0);
+    },
+    125000,
+  );
+
+  // Restricting to DuckDuckGo's official onion mirror (the same stable,
+  // content-stable site used for the direct-scrape Tor test in
+  // scrape.test.ts) means two things have to work: the configured search
+  // backend has to actually surface a .onion URL, and our own scrape step
+  // then has to fetch it through the Tor proxy. A content match proves the
+  // whole search -> Tor pipeline, not just the scrape half of it (which is
+  // already covered directly in scrape.test.ts). Requires a search backend
+  // capable of finding onion results, not just DDG's clearnet-only HTML
+  // scraper -- see HAS_SEARCH.
+  concurrentIf(HAS_SEARCH && HAS_TOR)(
+    "search can find and scrape onion results via Tor",
+    async () => {
+      const res = await search(
+        {
+          query: "duckduckgo onion",
+          includeDomains: [
+            "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion",
+          ],
+          limit: 3,
+          scrapeOptions: {
+            formats: ["markdown"],
+          },
+          timeout: 120000,
+        },
+        identity,
+      );
+
+      expect(res.web).toBeDefined();
+      expect(res.web?.length).toBeGreaterThan(0);
+
+      const scraped = res.web?.find(result => result.markdown);
+      expect(scraped).toBeDefined();
+      expect(scraped?.markdown).toContain("DuckDuckGo");
     },
     125000,
   );
