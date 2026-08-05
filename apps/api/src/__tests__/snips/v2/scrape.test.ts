@@ -300,15 +300,39 @@ describe("Scrape tests", () => {
   concurrentIf(TEST_SELF_HOST && HAS_TOR)(
     "onion URL scraping works via Tor proxy",
     async () => {
-      // Using a well-known onion site for testing
+      // DuckDuckGo's official onion mirror -- stable, well-known, and content
+      // doesn't drift, so a title match is a reliable signal that we actually
+      // reached the real site through Tor (rather than getting a fake success
+      // from something upstream returning a placeholder for an unreachable host).
       const response = await scrape(
         {
-          url: "http://torchdeedp3i2jigzjlnf5dplrllkjvdsujqevvvhp2uoxd2wpy5jdpjuqd.onion",
+          url: "http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion",
         },
         identity,
       );
 
-      expect(response.markdown).toBeDefined();
+      expect(response.metadata.statusCode).toBe(200);
+      expect(response.markdown).toContain("DuckDuckGo");
+    },
+    scrapeTimeout,
+  );
+
+  // A syntactically valid but non-existent .onion address must surface a real
+  // gateway-level failure -- this is a regression guard for a bug where
+  // unreachable .onion hosts silently returned a fake "Not Found" page
+  // instead of a real error, so a weaker .toBeDefined() check couldn't tell
+  // the difference between real Tor content and a masked failure.
+  concurrentIf(TEST_SELF_HOST && HAS_TOR)(
+    "nonexistent onion URL fails instead of returning a fake success",
+    async () => {
+      const response = await scrape(
+        {
+          url: "http://zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.onion",
+        },
+        identity,
+      );
+
+      expect(response.metadata.statusCode).toBeGreaterThanOrEqual(500);
     },
     scrapeTimeout,
   );

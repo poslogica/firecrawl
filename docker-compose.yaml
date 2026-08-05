@@ -52,7 +52,7 @@ x-common-env: &common-env
   PROXY_SERVER: ${PROXY_SERVER}
   PROXY_USERNAME: ${PROXY_USERNAME}
   PROXY_PASSWORD: ${PROXY_PASSWORD}
-  TOR_PROXY_URL: ${TOR_PROXY_URL:-socks5://tor-proxy:9050}
+  TOR_PROXY_URL: ${TOR_PROXY_URL:-socks5h://torproxy:9050}
   SEARXNG_ENDPOINT: ${SEARXNG_ENDPOINT}
   SEARXNG_ENGINES: ${SEARXNG_ENGINES}
   SEARXNG_CATEGORIES: ${SEARXNG_CATEGORIES}
@@ -73,6 +73,7 @@ services:
       PROXY_PASSWORD: ${PROXY_PASSWORD}
       ALLOW_LOCAL_WEBHOOKS: ${ALLOW_LOCAL_WEBHOOKS}
       BLOCK_MEDIA: ${BLOCK_MEDIA}
+      TOR_PROXY_URL: ${TOR_PROXY_URL:-socks5h://torproxy:9050}
       # Configure maximum concurrent pages for Playwright browser instances
       MAX_CONCURRENT_PAGES: ${CRAWL_CONCURRENT_REQUESTS:-10}
     networks:
@@ -141,20 +142,32 @@ services:
         compress: "true"
 
   # Tor proxy for .onion site crawling
-  tor-proxy:
+  torproxy:
     build: ../torproxy
     image: torproxy:local
+    container_name: torproxy
+    restart: unless-stopped
     networks:
       - backend
     ports:
-      - "9050:9050"   # SOCKS proxy
-      - "9051:9051"   # Control port (optional)
+      - "8118:8118"   # Privoxy HTTP/HTTPS proxy
+      - "9050:9050"   # Tor SOCKS proxy
+      - "9051:9051"   # Tor control port
+    volumes:
+      - tor-data:/var/lib/tor
+      - tor-config:/etc/tor
     logging:
       driver: "json-file"
       options:
         max-size: "5m"
         max-file: "2"
         compress: "true"
+    # environment:
+    #   - TZ=EST5EDT
+    #   - BW=100          # relay bandwidth limit in KB/s
+    #   - EXITNODE=1      # allow this to be a Tor exit node
+    #   - LOCATION=US     # restrict exit nodes to a country
+    #   - PASSWORD=secret # HashedControlPassword for control port
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -234,3 +247,5 @@ networks:
 volumes:
   fdb-data:
   fdb-cluster-file:
+  tor-data:
+  tor-config:

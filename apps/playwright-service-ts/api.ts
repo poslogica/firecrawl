@@ -33,6 +33,10 @@ const ALLOW_LOCAL_WEBHOOKS =
 const PROXY_SERVER = process.env.PROXY_SERVER || null;
 const PROXY_USERNAME = process.env.PROXY_USERNAME || null;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD || null;
+const TOR_PROXY_URL = process.env.TOR_PROXY_URL || null;
+
+const isOnionHost = (hostname: string): boolean =>
+  hostname.toLowerCase().replace(/\.$/, '').endsWith('.onion');
 
 class InsecureConnectionError extends Error {
   constructor(
@@ -47,6 +51,10 @@ class InsecureConnectionError extends Error {
 const isInternalHost = async (hostname: string): Promise<boolean> => {
   const host = hostname.toLowerCase().replace(/\.$/, '');
   if (!host) return true;
+  // .onion addresses don't resolve via normal DNS at all -- resolution happens
+  // on the Tor side once the request reaches the upstream SOCKS proxy, so a
+  // local lookup here would always fail and get misclassified as "internal".
+  if (isOnionHost(host)) return false;
 
   let addresses: string[];
   if (IPAddr.isValid(host)) {
@@ -85,7 +93,8 @@ const assertSafeTargetUrl = async (urlString: string): Promise<void> => {
   }
 };
 
-const buildUpstreamProxyUrl = (): string | undefined => {
+const buildUpstreamProxyUrl = (hostname: string): string | undefined => {
+  if (isOnionHost(hostname)) return TOR_PROXY_URL ?? undefined;
   if (!PROXY_SERVER) return undefined;
   const server = PROXY_SERVER.includes('://')
     ? PROXY_SERVER
@@ -107,7 +116,7 @@ const startSSRFProxy = async (): Promise<number> => {
           403,
         );
       }
-      return { upstreamProxyUrl: buildUpstreamProxyUrl() };
+      return { upstreamProxyUrl: buildUpstreamProxyUrl(hostname) };
     },
   });
   await server.listen();
