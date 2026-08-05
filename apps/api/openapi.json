@@ -13,6 +13,10 @@
   "servers": [
     {
       "url": "https://api.firecrawl.dev/v1"
+    },
+    {
+      "url": "http://localhost:3002/v1",
+      "description": "Local development server (no authentication required)"
     }
   ],
   "paths": {
