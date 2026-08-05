@@ -60,6 +60,7 @@ import { LLMRefusalError } from "./transformers/llmExtract";
 import { urlSpecificParams } from "./lib/urlSpecificParams";
 import { shouldCheckRobots } from "./shouldCheckRobots";
 import { loadMock, MockState } from "./lib/mock";
+import { bypassAltchaChallenge } from "./lib/altcha";
 import { CostTracking } from "../../lib/cost-tracking";
 import { getEngineForUrl } from "../WebScraper/utils/engine-forcing";
 import { useIndex } from "../../services/index";
@@ -542,13 +543,45 @@ async function scrapeURLLoopIter(
 ): Promise<EngineScrapeResult> {
   const abort = meta.abort.child(snipeAbort);
   try {
-    const engineResult = await scrapeURLWithEngine(
+    let engineResult = await scrapeURLWithEngine(
       {
         ...meta,
         abort,
       },
       engine,
     );
+
+    // Altcha (https://altcha.org) gates are an algorithmic proof-of-work
+    // challenge, not a visual CAPTCHA -- solvable by any client willing to do
+    // the arithmetic. Challenge pages are always small, so skip the check
+    // (and its cheerio parse) once we're clearly looking at real content.
+    if (
+      engineResult.html &&
+      engineResult.html.length <= MAX_HTML_SIZE_FOR_MARKDOWN_CHECK
+    ) {
+      const bypassed = await bypassAltchaChallenge(
+        engineResult.html,
+        engineResult.url || meta.rewrittenUrl || meta.url,
+        {
+          skipTlsVerification: meta.options.skipTlsVerification,
+          signal: abort.asSignal(),
+          logger: meta.logger,
+        },
+      );
+      if (bypassed) {
+        meta.logger.info("Bypassed Altcha challenge", {
+          engine,
+          url: bypassed.url,
+        });
+        engineResult = {
+          ...engineResult,
+          url: bypassed.url,
+          html: bypassed.html,
+          statusCode: bypassed.statusCode,
+          contentType: bypassed.contentType ?? engineResult.contentType,
+        };
+      }
+    }
 
     const hasMarkdown = hasFormatOfType(meta.options.formats, "markdown");
     const hasChangeTracking = hasFormatOfType(

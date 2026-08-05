@@ -42,7 +42,7 @@ function createBaseAgent(skipTlsVerification: boolean) {
   return baseAgent.compose(interceptors.redirect({ maxRedirections: 5000 }));
 }
 
-function attachSecurityCheck(agent: undici.Dispatcher) {
+export function attachSecurityCheck(agent: undici.Dispatcher) {
   agent.on("connect", (_, targets) => {
     const client: undici.Client = targets.slice(-1)[0] as undici.Client;
     const socketSymbol = Object.getOwnPropertySymbols(client).find(
