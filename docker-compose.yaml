@@ -52,6 +52,7 @@ x-common-env: &common-env
   PROXY_SERVER: ${PROXY_SERVER}
   PROXY_USERNAME: ${PROXY_USERNAME}
   PROXY_PASSWORD: ${PROXY_PASSWORD}
+  TOR_PROXY_URL: ${TOR_PROXY_URL:-socks5://tor-proxy:9050}
   SEARXNG_ENDPOINT: ${SEARXNG_ENDPOINT}
   SEARXNG_ENGINES: ${SEARXNG_ENGINES}
   SEARXNG_CATEGORIES: ${SEARXNG_CATEGORIES}
@@ -132,6 +133,22 @@ services:
     networks:
       - backend
     command: redis-server --bind 0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+        compress: "true"
+
+  # Tor proxy for .onion site crawling
+  tor-proxy:
+    build: ../torproxy
+    image: torproxy:local
+    networks:
+      - backend
+    ports:
+      - "9050:9050"   # SOCKS proxy
+      - "9051:9051"   # Control port (optional)
     logging:
       driver: "json-file"
       options:

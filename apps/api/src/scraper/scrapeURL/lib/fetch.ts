@@ -3,10 +3,20 @@ import { z, ZodError } from "zod";
 import * as Sentry from "@sentry/node";
 import { MockState, saveMock } from "./mock";
 import { fireEngineURL } from "../engines/fire-engine/scrape";
-import { fetch, Response, FormData, Agent } from "undici";
+import { fetch, Response, FormData, Agent, ProxyAgent } from "undici";
 import { cacheableLookup } from "./cacheableLookup";
 import dns from "dns";
 import { AbortManagerThrownError } from "./abortManager";
+import { config } from "../../../config";
+
+function isOnionUrl(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.endsWith(".onion");
+  } catch {
+    return false;
+  }
+}
 
 type RobustFetchParams<Schema extends z.Schema<any>> = {
   url: string;
@@ -42,6 +52,13 @@ const robustAgentNoLookup = new Agent({
     lookup: dns.lookup,
   },
 });
+
+function getOnionProxyAgent(): ProxyAgent | undefined {
+  if (!config.TOR_PROXY_URL) return undefined;
+  return new ProxyAgent({
+    uri: config.TOR_PROXY_URL,
+  });
+}
 
 export async function robustFetch<
   Schema extends z.Schema<any>,
@@ -109,6 +126,14 @@ export async function robustFetch<
   if (mock === null) {
     let request: Response;
     try {
+      // Use Tor proxy for .onion URLs if TOR_PROXY_URL is configured
+      const dispatcher =
+        isOnionUrl(url) && config.TOR_PROXY_URL
+          ? getOnionProxyAgent()
+          : useCacheableLookup
+            ? robustAgent
+            : robustAgentNoLookup;
+
       request = await fetch(url, {
         method,
         headers: {
@@ -122,7 +147,7 @@ export async function robustFetch<
           ...(headers !== undefined ? headers : {}),
         },
         signal: abort,
-        dispatcher: useCacheableLookup ? robustAgent : robustAgentNoLookup,
+        dispatcher,
         ...(body instanceof FormData
           ? {
               body,

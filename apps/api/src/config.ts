@@ -250,6 +250,7 @@ const configSchema = z.object({
   PROXY_SERVER: z.string().optional(),
   PROXY_USERNAME: z.string().optional(),
   PROXY_PASSWORD: z.string().optional(),
+  TOR_PROXY_URL: z.string().optional(),
 
   // External Services
   PLAYWRIGHT_MICROSERVICE_URL: z.string().optional(),

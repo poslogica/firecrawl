@@ -10,6 +10,7 @@ import {
   HAS_FIRE_ENGINE,
   HAS_PLAYWRIGHT,
   HAS_PROXY,
+  HAS_TOR,
   HAS_AI,
   ALLOW_TEST_SUITE_WEBSITE,
 } from "../lib";
@@ -291,6 +292,23 @@ describe("Scrape tests", () => {
       expect(response.markdown?.trim()).toContain(
         config.PROXY_SERVER!.split("://").slice(-1)[0].split(":")[0],
       );
+    },
+    scrapeTimeout,
+  );
+
+  // Test .onion URL scraping via Tor proxy
+  concurrentIf(TEST_SELF_HOST && HAS_TOR)(
+    "onion URL scraping works via Tor proxy",
+    async () => {
+      // Using a well-known onion site for testing
+      const response = await scrape(
+        {
+          url: "http://torchdeedp3i2jigzjlnf5dplrllkjvdsujqevvvhp2uoxd2wpy5jdpjuqd.onion",
+        },
+        identity,
+      );
+
+      expect(response.markdown).toBeDefined();
     },
     scrapeTimeout,
   );
