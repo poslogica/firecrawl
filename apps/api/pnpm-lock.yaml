@@ -196,8 +196,8 @@ importers:
         specifier: ^3.14.0
         version: 3.14.0
       koffi:
-        specifier: ^2.9.0
-        version: 2.9.0
+        specifier: ^2.16.3
+        version: 2.16.3
       langsmith:
         specifier: ^0.6.0
         version: 0.6.3(@opentelemetry/api@1.9.1)(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))(ws@8.21.0)
@@ -3212,8 +3212,8 @@ packages:
       '@types/node': '>=18'
       typescript: '>=5.0.4 <7'
 
-  koffi@2.9.0:
-    resolution: {integrity: sha512-KCsuJ2gM58n6bNdR2Z7gqsh/3TchxxQFbVgax2/UvAjRTgwNSYAJDx9E3jrkBP4jEDHWRCfE47Y2OG+/fiSvEw==}
+  koffi@2.16.3:
+    resolution: {integrity: sha512-E9y1AsgYGlaxMhcZzHr8y96QF2U5XzA12GGVAfbWqIubTwPNMXQarfBzePNXHe0xtIEtNd6ifAv3GAKYGUeBAQ==}
 
   kuler@2.0.0:
     resolution: {integrity: sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==}
@@ -7050,7 +7050,7 @@ snapshots:
       yaml: 2.9.0
       zod: 4.1.12
 
-  koffi@2.9.0: {}
+  koffi@2.16.3: {}
 
   kuler@2.0.0: {}
 
