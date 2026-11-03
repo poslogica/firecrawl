@@ -140,7 +140,7 @@ class TestAsyncCrawlDirectKwargs:
         monkeypatch.setattr(async_crawl_mod, "start_crawl", fake_start_crawl)
 
         with pytest.raises(ConnectionError):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 async_client.start_crawl("https://example.com", formats=["markdown"])
             )
 
@@ -158,7 +158,7 @@ class TestAsyncCrawlDirectKwargs:
         monkeypatch.setattr(async_crawl_mod, "start_crawl", fake_start_crawl)
 
         with pytest.raises(ConnectionError):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 async_client.start_crawl(
                     "https://example.com",
                     scrape_options=ScrapeOptions(formats=["html"]),
@@ -180,7 +180,7 @@ class TestAsyncCrawlDirectKwargs:
         monkeypatch.setattr(async_crawl_mod, "start_crawl", fake_start_crawl)
 
         with pytest.raises(ConnectionError):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 async_client.start_crawl(
                     "https://example.com",
                     formats=["markdown"],
@@ -241,7 +241,7 @@ class TestThreatProtectionDirectKwargs:
         monkeypatch.setattr(async_crawl_mod, "start_crawl", fake_start_crawl)
 
         with pytest.raises(ConnectionError):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 async_client.start_crawl(
                     "https://example.com",
                     threat_protection=self._threat_protection(),

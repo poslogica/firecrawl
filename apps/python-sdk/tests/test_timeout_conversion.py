@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-from firecrawl import FirecrawlApp
+from firecrawl import V1FirecrawlApp as FirecrawlApp
 
 
 class TestTimeoutConversion(unittest.TestCase):
