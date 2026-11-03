@@ -40,6 +40,24 @@ updates:
       prefix: "apps/test-suite"
       include: "scope"
 
+  # js-sdk (examples) and js-sdk/firecrawl (published @mendable/firecrawl-js)
+  # The SDK's public API takes caller-supplied zod 3 schemas, so a zod major
+  # bump is a breaking change for users; ignore rules also apply to security
+  # update PRs.
+  - package-ecosystem: "npm"
+    directories:
+      - "/apps/js-sdk"
+      - "/apps/js-sdk/firecrawl"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 0  # Disable version updates
+    commit-message:
+      prefix: "apps/js-sdk"
+      include: "scope"
+    ignore:
+      - dependency-name: "zod"
+        update-types: ["version-update:semver-major"]
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
