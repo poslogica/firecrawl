@@ -1,0 +1,45 @@
+# Free PR checks for the JS SDK on GitHub-hosted runners (no secrets).
+# The upstream test-js-sdk workflow uses paid Blacksmith runners and e2e
+# tests that need an API key.
+name: PR checks / js-sdk
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/js-sdk/firecrawl/**
+      - .github/workflows/pr-checks-js-sdk.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  js-sdk:
+    name: Unit tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/js-sdk/firecrawl
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4
+        with:
+          version: 11.4.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/js-sdk/firecrawl/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test:unit
+      - run: pnpm run build

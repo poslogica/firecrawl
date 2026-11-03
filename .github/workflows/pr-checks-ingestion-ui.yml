@@ -1,0 +1,43 @@
+# Free PR checks for the ingestion UI on GitHub-hosted runners (no secrets).
+name: PR checks / ingestion-ui
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/ui/ingestion-ui/**
+      - .github/workflows/pr-checks-ingestion-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ingestion-ui:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/ui/ingestion-ui
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4
+        with:
+          version: 11.4.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/ui/ingestion-ui/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run build
