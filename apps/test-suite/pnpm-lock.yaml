@@ -7,12 +7,12 @@ settings:
 overrides:
   fast-xml-builder: '>=1.1.6 <2.0.0'
   fast-xml-parser: ^5.7.0
-  minimatch@<10.2.3: '>=10.2.3'
-  undici@>=7.0.0 <7.29.0: 7.29.0
+  minimatch@<11.0.1: '>=11.0.1'
+  undici@>=7.0.0 <7.30.1: '>=7.30.1 <8.0.0'
   picomatch@<4.0.4: '>=4.0.4'
-  brace-expansion@>=5.0.0 <5.0.9: 5.0.9
+  brace-expansion@>=5.0.0 <5.0.12: 5.0.12
   socket.io-parser@<4.2.7: 4.2.7
-  js-yaml@>=3.0.0 <3.15.0: 3.15.0
+  js-yaml@>=3.0.0 <3.15.2: 3.15.2
   ws@>=7.0.0 <7.5.11: 7.5.11
   ws@>=8.0.0 <8.21.0: 8.21.0
   form-data@>=4.0.0 <4.0.6: 4.0.6
@@ -20,7 +20,8 @@ overrides:
   protobufjs@>=7.0.0 <7.6.5: 7.6.5
   uuid@<11.1.1: 11.1.1
   postcss@<8.5.23: '>=8.5.23 <9.0.0'
-  '@grpc/grpc-js@>=1.14.0 <2.0.0': 1.14.4
+  '@grpc/grpc-js@>=1.14.0 <2.0.0': '>=1.14.5 <2.0.0'
+  '@faker-js/faker@<10.5.0': '>=10.5.0 <11.0.0'
   '@opentelemetry/core@>=2.0.0 <2.8.0': 2.8.0
 
 importers:
@@ -29,7 +30,7 @@ importers:
     devDependencies:
       artillery:
         specifier: ^2.0.33
-        version: 2.0.33(@types/node@25.5.0)(supports-color@8.1.1)
+        version: 2.0.33(@types/node@25.5.0)
 
 packages:
 
@@ -292,12 +293,12 @@ packages:
     resolution: {integrity: sha512-QLqTtVETsa2GN/YabSnSNhCfJP/cMaQRr3mYML9L76mH6JoNWERUpXzIko6uVmvvYS+QYvbmj8gQSu/RGwZEVQ==}
     engines: {node: '>=12.0.0'}
 
-  '@faker-js/faker@10.4.0':
-    resolution: {integrity: sha512-sDBWI3yLy8EcDzgobvJTWq1MJYzAkQdpjXuPukga9wXonhpMRvd1Izuo2Qgwey2OiEoRIBr35RMU9HJRoOHzpw==}
+  '@faker-js/faker@10.6.0':
+    resolution: {integrity: sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
-  '@grpc/grpc-js@1.14.4':
-    resolution: {integrity: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==}
+  '@grpc/grpc-js@1.14.7':
+    resolution: {integrity: sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/proto-loader@0.8.0':
@@ -594,12 +595,14 @@ packages:
   '@opentelemetry/sdk-trace-base@2.7.1':
     resolution: {integrity: sha512-NAYIlsF8MPUsKqJMiDQJTMPOmlbawC1Iz/omMLygZ1C9am8fTKYjTaI+OZM+WTY3t3Glo0wnOg/6/pac6RGPPw==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-base@2.8.0':
     resolution: {integrity: sha512-mhU4jp+vW0mGbFRd+GeXHvmfA4aDqWjBjLC3pE5XMpLs0IE2ryYb019Ts2AQrOq67gaTF25D91+fgvEHDZEnuQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
@@ -662,6 +665,7 @@ packages:
   '@smithy/core@3.24.7':
     resolution: {integrity: sha512-KoUi4M1f3BG6kzN1FnCwL7oyFptTbyBJKjR6yhSib+JHRdUmM1o+VwsFtJ66NZCkCzVfJMWRHJNo0R0jznp0Pg==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.3.9':
     resolution: {integrity: sha512-ZlfJ/4Fa3jYb+3eaohPfG9utX9HmdhFNcFtpoGAhUhdynAOmGXtmigbi7eEiONKM+ykHw8RwKuDEb85Lx7t7fA==}
@@ -836,10 +840,6 @@ packages:
 
   brace-expansion@5.0.12:
     resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
-    engines: {node: 20 || >=22}
-
-  brace-expansion@5.0.9:
-    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -1392,8 +1392,8 @@ packages:
   joi@17.13.9:
     resolution: {integrity: sha512-llFCT2rVtfwgBCaIqxtjim+iHqrgss4ONiGSYiiGH9jnjWq90ppSRffqmqKvwpa8W+YfILyQV6XyGcegXX2T4g==}
 
-  js-yaml@3.15.0:
-    resolution: {integrity: sha512-ttBQIIQPDeLjpPOohtUdXuXUVoA2uIB6fEH9HyJ7234s5mBJ5wTx20njxplLZQgLaOfpmPQA7X2t5AX6tIPbog==}
+  js-yaml@3.15.2:
+    resolution: {integrity: sha512-6EuL879VkRA+1Cz578mKMiKvjPNEuk6+r1JaFzoSWejZmtf7xWbIyw1e3KkxlkzTIt9Taw6JBhEppG7utc1P+w==}
     hasBin: true
 
   jsep@1.4.0:
@@ -1496,10 +1496,6 @@ packages:
   mimic-response@4.0.0:
     resolution: {integrity: sha512-e5ISH9xMYU0DzrT+jl8q2ze9D6eWBto+I8CNpe+VI+K2J/F/k3PdkdTdz4wvGVH4NTpo+NRYTVIuMQEMMcsLqg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  minimatch@10.2.6:
-    resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
-    engines: {node: 18 || 20 || >=22}
 
   minimatch@11.0.4:
     resolution: {integrity: sha512-/UJ1dEoVQTjPNDh6SGlUo+ueLMmoHTas4q+8yaAR/5t6nLAIiBDJtoYUh20IYleix7ehiQkgczb84PE3uzHkxg==}
@@ -1619,6 +1615,7 @@ packages:
   prom-client@14.2.0:
     resolution: {integrity: sha512-sF308EhTenb/pDRPakm+WgiN+VdM/T1RaHj1x+MvAuT8UiQP8JmOEbxVqtkbfR4LrvOg5n7ic01kRBDGXjYikA==}
     engines: {node: '>=10'}
+    deprecated: prom-client has been replaced by @prometheus-io/client
 
   protobufjs@7.6.5:
     resolution: {integrity: sha512-/FPD0nUc9jH6rfFjji9IBqOz4pcSE3CsT1m7Ep6Mdb0LxSUMj8hgl6GomOvZzpNpAqqGaXA0P3VSrZLFzIhQrw==}
@@ -1785,8 +1782,8 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
-  undici@7.29.0:
-    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   unique-string@3.0.0:
@@ -1904,7 +1901,7 @@ packages:
 
 snapshots:
 
-  '@artilleryio/int-commons@2.24.0(supports-color@8.1.1)':
+  '@artilleryio/int-commons@2.24.0':
     dependencies:
       async: 2.6.4
       cheerio: 1.2.0
@@ -1917,12 +1914,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@artilleryio/int-core@2.28.0(supports-color@8.1.1)':
+  '@artilleryio/int-core@2.28.0':
     dependencies:
-      '@artilleryio/int-commons': 2.24.0(supports-color@8.1.1)
+      '@artilleryio/int-commons': 2.24.0
       '@artilleryio/sketches-js': 2.1.1
       agentkeepalive: 4.6.0
-      arrivals: 2.1.2(supports-color@8.1.1)
+      arrivals: 2.1.2
       async: 2.6.4
       chalk: 2.4.2
       cheerio: 1.2.0
@@ -1939,11 +1936,11 @@ snapshots:
       form-data: 4.0.6
       got: 14.6.6
       hpagent: 0.1.2
-      https-proxy-agent: 5.0.1(supports-color@8.1.1)
+      https-proxy-agent: 5.0.1
       lodash: 4.18.1
       ms: 2.1.3
       protobufjs: 7.6.5
-      socket.io-client: 4.8.3(supports-color@8.1.1)
+      socket.io-client: 4.8.3
       socketio-wildcard: 2.0.0
       tough-cookie: 5.1.2
       uuid: 11.1.1
@@ -2371,49 +2368,49 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/arm-containerinstance@9.1.0(supports-color@8.1.1)':
+  '@azure/arm-containerinstance@9.1.0':
     dependencies:
       '@azure/abort-controller': 1.1.0
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-client': 1.10.1(supports-color@8.1.1)
-      '@azure/core-lro': 2.7.2(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.1
+      '@azure/core-lro': 2.7.2
       '@azure/core-paging': 1.6.2
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-rest-pipeline': 1.23.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/core-auth@1.10.1(supports-color@8.1.1)':
+  '@azure/core-auth@1.10.1':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/core-client@1.10.1(supports-color@8.1.1)':
+  '@azure/core-client@1.10.1':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
+      '@azure/core-rest-pipeline': 1.23.0
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/core-http-compat@2.3.2(@azure/core-client@1.10.1(supports-color@8.1.1))(@azure/core-rest-pipeline@1.23.0(supports-color@8.1.1))':
+  '@azure/core-http-compat@2.3.2(@azure/core-client@1.10.1)(@azure/core-rest-pipeline@1.23.0)':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-client': 1.10.1(supports-color@8.1.1)
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-client': 1.10.1
+      '@azure/core-rest-pipeline': 1.23.0
 
-  '@azure/core-lro@2.7.2(supports-color@8.1.1)':
+  '@azure/core-lro@2.7.2':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2422,14 +2419,14 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-rest-pipeline@1.23.0(supports-color@8.1.1)':
+  '@azure/core-rest-pipeline@1.23.0':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
-      '@typespec/ts-http-runtime': 0.3.4(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
+      '@typespec/ts-http-runtime': 0.3.4
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2438,10 +2435,10 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-util@1.13.1(supports-color@8.1.1)':
+  '@azure/core-util@1.13.1':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@typespec/ts-http-runtime': 0.3.4(supports-color@8.1.1)
+      '@typespec/ts-http-runtime': 0.3.4
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2451,15 +2448,15 @@ snapshots:
       fast-xml-parser: 5.7.1
       tslib: 2.8.1
 
-  '@azure/identity@4.13.0(supports-color@8.1.1)':
+  '@azure/identity@4.13.0':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-client': 1.10.1(supports-color@8.1.1)
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.1
+      '@azure/core-rest-pipeline': 1.23.0
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
       '@azure/msal-browser': 4.29.1
       '@azure/msal-node': 3.8.9
       open: 10.2.0
@@ -2467,9 +2464,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/logger@1.3.0(supports-color@8.1.1)':
+  '@azure/logger@1.3.0':
     dependencies:
-      '@typespec/ts-http-runtime': 0.3.4(supports-color@8.1.1)
+      '@typespec/ts-http-runtime': 0.3.4
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2486,53 +2483,53 @@ snapshots:
       jsonwebtoken: 9.0.3
       uuid: 11.1.1
 
-  '@azure/storage-blob@12.31.0(supports-color@8.1.1)':
+  '@azure/storage-blob@12.31.0':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-client': 1.10.1(supports-color@8.1.1)
-      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1(supports-color@8.1.1))(@azure/core-rest-pipeline@1.23.0(supports-color@8.1.1))
-      '@azure/core-lro': 2.7.2(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.1
+      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1)(@azure/core-rest-pipeline@1.23.0)
+      '@azure/core-lro': 2.7.2
       '@azure/core-paging': 1.6.2
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-rest-pipeline': 1.23.0
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
       '@azure/core-xml': 1.5.0
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
-      '@azure/storage-common': 12.3.0(@azure/core-client@1.10.1(supports-color@8.1.1))(supports-color@8.1.1)
+      '@azure/logger': 1.3.0
+      '@azure/storage-common': 12.3.0(@azure/core-client@1.10.1)
       events: 3.3.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/storage-common@12.3.0(@azure/core-client@1.10.1(supports-color@8.1.1))(supports-color@8.1.1)':
+  '@azure/storage-common@12.3.0(@azure/core-client@1.10.1)':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1(supports-color@8.1.1))(@azure/core-rest-pipeline@1.23.0(supports-color@8.1.1))
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-auth': 1.10.1
+      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1)(@azure/core-rest-pipeline@1.23.0)
+      '@azure/core-rest-pipeline': 1.23.0
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
       events: 3.3.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@azure/core-client'
       - supports-color
 
-  '@azure/storage-queue@12.29.0(supports-color@8.1.1)':
+  '@azure/storage-queue@12.29.0':
     dependencies:
       '@azure/abort-controller': 2.1.2
-      '@azure/core-auth': 1.10.1(supports-color@8.1.1)
-      '@azure/core-client': 1.10.1(supports-color@8.1.1)
-      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1(supports-color@8.1.1))(@azure/core-rest-pipeline@1.23.0(supports-color@8.1.1))
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.1
+      '@azure/core-http-compat': 2.3.2(@azure/core-client@1.10.1)(@azure/core-rest-pipeline@1.23.0)
       '@azure/core-paging': 1.6.2
-      '@azure/core-rest-pipeline': 1.23.0(supports-color@8.1.1)
+      '@azure/core-rest-pipeline': 1.23.0
       '@azure/core-tracing': 1.3.1
-      '@azure/core-util': 1.13.1(supports-color@8.1.1)
+      '@azure/core-util': 1.13.1
       '@azure/core-xml': 1.5.0
-      '@azure/logger': 1.3.0(supports-color@8.1.1)
-      '@azure/storage-common': 12.3.0(@azure/core-client@1.10.1(supports-color@8.1.1))(supports-color@8.1.1)
+      '@azure/logger': 1.3.0
+      '@azure/storage-common': 12.3.0(@azure/core-client@1.10.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2553,9 +2550,9 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@faker-js/faker@10.4.0': {}
+  '@faker-js/faker@10.6.0': {}
 
-  '@grpc/grpc-js@1.14.4':
+  '@grpc/grpc-js@1.14.7':
     dependencies:
       '@grpc/proto-loader': 0.8.0
       '@js-sdsl/ordered-map': 4.4.2
@@ -2726,7 +2723,7 @@ snapshots:
       indent-string: 4.0.0
       is-wsl: 2.2.0
       lilconfig: 3.1.3
-      minimatch: 10.2.6
+      minimatch: 11.0.4
       semver: 7.7.4
       string-width: 4.2.3
       supports-color: 8.1.1
@@ -2765,7 +2762,7 @@ snapshots:
 
   '@opentelemetry/exporter-metrics-otlp-grpc@0.218.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@grpc/grpc-js': 1.14.7
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-metrics-otlp-http': 0.218.0(@opentelemetry/api@1.9.0)
@@ -2796,7 +2793,7 @@ snapshots:
 
   '@opentelemetry/exporter-trace-otlp-grpc@0.218.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@grpc/grpc-js': 1.14.7
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-exporter-base': 0.218.0(@opentelemetry/api@1.9.0)
@@ -2839,7 +2836,7 @@ snapshots:
 
   '@opentelemetry/otlp-grpc-exporter-base@0.218.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@grpc/grpc-js': 1.14.7
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-exporter-base': 0.218.0(@opentelemetry/api@1.9.0)
@@ -3012,10 +3009,10 @@ snapshots:
 
   '@types/pako@1.0.7': {}
 
-  '@typespec/ts-http-runtime@0.3.4(supports-color@8.1.1)':
+  '@typespec/ts-http-runtime@0.3.4':
     dependencies:
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -3030,7 +3027,7 @@ snapshots:
 
   acorn@8.16.0: {}
 
-  agent-base@6.0.2(supports-color@8.1.1):
+  agent-base@6.0.2:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
@@ -3067,14 +3064,14 @@ snapshots:
     dependencies:
       sprintf-js: 1.0.3
 
-  arrivals@2.1.2(supports-color@8.1.1):
+  arrivals@2.1.2:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       nanotimer: 0.3.14
     transitivePeerDependencies:
       - supports-color
 
-  artillery-engine-playwright@1.30.0(supports-color@8.1.1):
+  artillery-engine-playwright@1.30.0:
     dependencies:
       '@playwright/browser-chromium': 1.61.0
       '@playwright/test': 1.61.0
@@ -3085,7 +3082,7 @@ snapshots:
 
   artillery-plugin-apdex@1.24.0: {}
 
-  artillery-plugin-ensure@1.27.0(supports-color@8.1.1):
+  artillery-plugin-ensure@1.27.0:
     dependencies:
       chalk: 2.4.2
       debug: 4.4.3(supports-color@8.1.1)
@@ -3093,7 +3090,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  artillery-plugin-expect@2.27.0(supports-color@8.1.1):
+  artillery-plugin-expect@2.27.0:
     dependencies:
       chalk: 4.1.2
       debug: 4.4.3(supports-color@8.1.1)
@@ -3104,15 +3101,15 @@ snapshots:
 
   artillery-plugin-fake-data@1.24.0:
     dependencies:
-      '@faker-js/faker': 10.4.0
+      '@faker-js/faker': 10.6.0
 
-  artillery-plugin-metrics-by-endpoint@1.27.0(supports-color@8.1.1):
+  artillery-plugin-metrics-by-endpoint@1.27.0:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  artillery-plugin-publish-metrics@2.38.0(supports-color@8.1.1):
+  artillery-plugin-publish-metrics@2.38.0:
     dependencies:
       '@aws-sdk/client-cloudwatch': 3.1068.0
       '@opentelemetry/api': 1.9.0
@@ -3129,12 +3126,12 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.40.0
       async: 2.6.4
-      datadog-metrics: 0.12.1(supports-color@8.1.1)
+      datadog-metrics: 0.12.1
       debug: 4.4.3(supports-color@8.1.1)
       dogapi: 2.8.4
       got: 14.6.6
       hot-shots: 10.2.1
-      mixpanel: 0.18.1(supports-color@8.1.1)
+      mixpanel: 0.18.1
       opentracing: 0.14.7
       prom-client: 14.2.0
       semver: 7.7.4
@@ -3143,17 +3140,17 @@ snapshots:
       - encoding
       - supports-color
 
-  artillery-plugin-slack@1.22.0(supports-color@8.1.1):
+  artillery-plugin-slack@1.22.0:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       got: 14.6.6
     transitivePeerDependencies:
       - supports-color
 
-  artillery@2.0.33(@types/node@25.5.0)(supports-color@8.1.1):
+  artillery@2.0.33(@types/node@25.5.0):
     dependencies:
-      '@artilleryio/int-commons': 2.24.0(supports-color@8.1.1)
-      '@artilleryio/int-core': 2.28.0(supports-color@8.1.1)
+      '@artilleryio/int-commons': 2.24.0
+      '@artilleryio/int-core': 2.28.0
       '@aws-sdk/client-cloudwatch': 3.1068.0
       '@aws-sdk/client-cloudwatch-logs': 3.1068.0
       '@aws-sdk/client-ec2': 3.1068.0
@@ -3165,23 +3162,23 @@ snapshots:
       '@aws-sdk/client-ssm': 3.1068.0
       '@aws-sdk/client-sts': 3.1068.0
       '@aws-sdk/credential-providers': 3.1068.0
-      '@azure/arm-containerinstance': 9.1.0(supports-color@8.1.1)
-      '@azure/identity': 4.13.0(supports-color@8.1.1)
-      '@azure/storage-blob': 12.31.0(supports-color@8.1.1)
-      '@azure/storage-queue': 12.29.0(supports-color@8.1.1)
+      '@azure/arm-containerinstance': 9.1.0
+      '@azure/identity': 4.13.0
+      '@azure/storage-blob': 12.31.0
+      '@azure/storage-queue': 12.29.0
       '@oclif/core': 4.9.0
       '@oclif/plugin-help': 6.2.38
       '@oclif/plugin-not-found': 3.2.75(@types/node@25.5.0)
       '@smithy/core': 3.24.7
       '@upstash/redis': 1.37.0
-      artillery-engine-playwright: 1.30.0(supports-color@8.1.1)
+      artillery-engine-playwright: 1.30.0
       artillery-plugin-apdex: 1.24.0
-      artillery-plugin-ensure: 1.27.0(supports-color@8.1.1)
-      artillery-plugin-expect: 2.27.0(supports-color@8.1.1)
+      artillery-plugin-ensure: 1.27.0
+      artillery-plugin-expect: 2.27.0
       artillery-plugin-fake-data: 1.24.0
-      artillery-plugin-metrics-by-endpoint: 1.27.0(supports-color@8.1.1)
-      artillery-plugin-publish-metrics: 2.38.0(supports-color@8.1.1)
-      artillery-plugin-slack: 1.22.0(supports-color@8.1.1)
+      artillery-plugin-metrics-by-endpoint: 1.27.0
+      artillery-plugin-publish-metrics: 2.38.0
+      artillery-plugin-slack: 1.22.0
       async: 2.6.4
       chalk: 2.4.2
       chokidar: 3.6.0
@@ -3197,14 +3194,14 @@ snapshots:
       fs-extra: 11.3.4
       got: 14.6.6
       joi: 17.13.9
-      js-yaml: 3.15.0
+      js-yaml: 3.15.2
       jsonwebtoken: 9.0.3
       lodash: 4.18.1
       moment: 2.31.0
       nanoid: 3.3.20
       ora: 4.1.1
       rc: 1.2.8
-      sqs-consumer: 6.0.2(@aws-sdk/client-sqs@3.1068.0)(supports-color@8.1.1)
+      sqs-consumer: 6.0.2(@aws-sdk/client-sqs@3.1068.0)
       tempy: 3.1.0
       walk-sync: 0.2.7
       yaml-js: 0.3.1
@@ -3241,10 +3238,6 @@ snapshots:
   bowser@2.14.1: {}
 
   brace-expansion@5.0.12:
-    dependencies:
-      balanced-match: 4.0.4
-
-  brace-expansion@5.0.9:
     dependencies:
       balanced-match: 4.0.4
 
@@ -3317,7 +3310,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 7.29.0
+      undici: 7.30.1
       whatwg-mimetype: 4.0.0
 
   chokidar@3.6.0:
@@ -3413,7 +3406,7 @@ snapshots:
 
   csv-parse@4.16.3: {}
 
-  datadog-metrics@0.12.1(supports-color@8.1.1):
+  datadog-metrics@0.12.1:
     dependencies:
       '@datadog/datadog-api-client': 1.53.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -3509,7 +3502,7 @@ snapshots:
       iconv-lite: 0.6.3
       whatwg-encoding: 3.1.1
 
-  engine.io-client@6.6.4(supports-color@8.1.1):
+  engine.io-client@6.6.4:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.4.3(supports-color@8.1.1)
@@ -3601,7 +3594,7 @@ snapshots:
 
   filelist@1.0.6:
     dependencies:
-      minimatch: 10.2.6
+      minimatch: 11.0.4
 
   fill-range@7.1.1:
     dependencies:
@@ -3714,7 +3707,7 @@ snapshots:
 
   http-cache-semantics@4.3.0: {}
 
-  http-proxy-agent@7.0.2(supports-color@8.1.1):
+  http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
@@ -3726,21 +3719,21 @@ snapshots:
       quick-lru: 5.1.1
       resolve-alpn: 1.2.1
 
-  https-proxy-agent@5.0.0(supports-color@8.1.1):
+  https-proxy-agent@5.0.0:
     dependencies:
-      agent-base: 6.0.2(supports-color@8.1.1)
+      agent-base: 6.0.2
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@5.0.1(supports-color@8.1.1):
+  https-proxy-agent@5.0.1:
     dependencies:
-      agent-base: 6.0.2(supports-color@8.1.1)
+      agent-base: 6.0.2
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@7.0.6(supports-color@8.1.1):
+  https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
@@ -3817,7 +3810,7 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  js-yaml@3.15.0:
+  js-yaml@3.15.2:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
@@ -3916,10 +3909,6 @@ snapshots:
 
   mimic-response@4.0.0: {}
 
-  minimatch@10.2.6:
-    dependencies:
-      brace-expansion: 5.0.9
-
   minimatch@11.0.4:
     dependencies:
       '@isaacs/nonrecursive-glob-match': 1.0.3
@@ -3927,9 +3916,9 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  mixpanel@0.18.1(supports-color@8.1.1):
+  mixpanel@0.18.1:
     dependencies:
-      https-proxy-agent: 5.0.0(supports-color@8.1.1)
+      https-proxy-agent: 5.0.0
     transitivePeerDependencies:
       - supports-color
 
@@ -4081,18 +4070,18 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  socket.io-client@4.8.3(supports-color@8.1.1):
+  socket.io-client@4.8.3:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.4.3(supports-color@8.1.1)
-      engine.io-client: 6.6.4(supports-color@8.1.1)
-      socket.io-parser: 4.2.7(supports-color@8.1.1)
+      engine.io-client: 6.6.4
+      socket.io-parser: 4.2.7
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  socket.io-parser@4.2.7(supports-color@8.1.1):
+  socket.io-parser@4.2.7:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.4.3(supports-color@8.1.1)
@@ -4103,7 +4092,7 @@ snapshots:
 
   sprintf-js@1.0.3: {}
 
-  sqs-consumer@6.0.2(@aws-sdk/client-sqs@3.1068.0)(supports-color@8.1.1):
+  sqs-consumer@6.0.2(@aws-sdk/client-sqs@3.1068.0):
     dependencies:
       '@aws-sdk/client-sqs': 3.1068.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -4184,7 +4173,7 @@ snapshots:
 
   undici-types@7.18.2: {}
 
-  undici@7.29.0: {}
+  undici@7.30.1: {}
 
   unique-string@3.0.0:
     dependencies:
