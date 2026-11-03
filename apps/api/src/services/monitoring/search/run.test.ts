@@ -528,7 +528,10 @@ describe("domain scoping", () => {
       } as Partial<typeof baseTarget>,
     });
     const sentQuery = searchMock.mock.calls[0][0].query as string;
-    expect(sentQuery).toContain("(site:reuters.com OR site:spam.example)");
+    // Bare `site:` operators: the query builder deliberately avoids a
+    // parenthesized group, which some search backends drop.
+    expect(sentQuery).toContain("site:reuters.com OR site:spam.example");
+    expect(sentQuery).not.toContain("(site:");
     expect(sentQuery).toContain("-site:spam.example");
   });
 
