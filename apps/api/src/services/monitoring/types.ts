@@ -163,7 +163,8 @@ const monitorNotificationInner = z
     if (notification.slack?.enabled && !notification.slack.channelId) {
       ctx.addIssue({
         code: "custom",
-        message: "A Slack channel is required when Slack notifications are enabled",
+        message:
+          "A Slack channel is required when Slack notifications are enabled",
         path: ["slack", "channelId"],
       });
     }
@@ -196,7 +197,7 @@ const createMonitorBaseSchema = z.strictObject({
   retentionDays: z.number().int().positive().max(365).optional().default(30),
   goal: z.string().max(2000).nullish(),
   judgeEnabled: z.boolean().optional(),
-  origin: z.string().optional().prefault("api"),
+  origin: z.string().prefault("api"),
 });
 
 function requireGoalForSearchTargets(
