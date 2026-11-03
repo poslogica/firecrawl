@@ -330,7 +330,7 @@ const crawlFinishWorker = async () => {
     const job = await crawlFinishedQueue.getJobToProcess();
 
     if (job === null) {
-      __logger.info("No jobs to process", { module: "nuq/metrics" });
+      __logger.debug("No jobs to process", { module: "nuq/metrics" });
       await new Promise(resolve => setTimeout(resolve, noJobTimeout));
       if (!config.NUQ_RABBITMQ_URL) {
         noJobTimeout = Math.min(noJobTimeout * 2, 10000);

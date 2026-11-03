@@ -121,7 +121,7 @@ export async function runNuqWorker(options: {
     const job = await options.queue.getJobToProcess();
 
     if (job === null) {
-      _logger.info("No jobs to process", { module: "nuq/metrics" });
+      _logger.debug("No jobs to process", { module: "nuq/metrics" });
       await new Promise(resolve => setTimeout(resolve, noJobTimeout));
       if (!config.NUQ_RABBITMQ_URL) {
         noJobTimeout = Math.min(noJobTimeout * 2, 10000);

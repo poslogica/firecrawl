@@ -515,7 +515,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqGetJob metrics", {
+        _logger.debug("nuqGetJob metrics", {
           module: "nuq/metrics",
           method: "nuqGetJob",
           duration,
@@ -540,7 +540,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => this.rowToJob(row)!);
     } finally {
-      _logger.info("nuqGetJobs metrics", {
+      _logger.debug("nuqGetJobs metrics", {
         module: "nuq/metrics",
         method: "nuqGetJobs",
         duration: Date.now() - start,
@@ -564,7 +564,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => this.rowToJob(row, true)!);
     } finally {
-      _logger.info("nuqGetJobsFromBacklog metrics", {
+      _logger.debug("nuqGetJobsFromBacklog metrics", {
         module: "nuq/metrics",
         method: "nuqGetJobsFromBacklog",
         duration: Date.now() - start,
@@ -589,7 +589,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => this.rowToJob(row)!);
     } finally {
-      _logger.info("nuqGetJobsWithStatus metrics", {
+      _logger.debug("nuqGetJobsWithStatus metrics", {
         module: "nuq/metrics",
         method: "nuqGetJobsWithStatus",
         duration: Date.now() - start,
@@ -615,7 +615,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => this.rowToJob(row)!);
     } finally {
-      _logger.info("nuqGetJobsWithStatuses metrics", {
+      _logger.debug("nuqGetJobsWithStatuses metrics", {
         module: "nuq/metrics",
         method: "nuqGetJobsWithStatuses",
         duration: Date.now() - start,
@@ -672,7 +672,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         ).rows.map(row => [row.status, parseInt(row.count, 10)]),
       );
     } finally {
-      _logger.info("nuqGetGroupNumericStats metrics", {
+      _logger.debug("nuqGetGroupNumericStats metrics", {
         module: "nuq/metrics",
         method: "nuqGetGroupNumericStats",
         duration: Date.now() - start,
@@ -692,7 +692,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => row.owner_id);
     } finally {
-      _logger.info("nuqGetBackloggedOwnerIDs metrics", {
+      _logger.debug("nuqGetBackloggedOwnerIDs metrics", {
         module: "nuq/metrics",
         method: "nuqGetBackloggedOwnerIDs",
         duration: Date.now() - start,
@@ -713,7 +713,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => row.id);
     } finally {
-      _logger.info("nuqGetBackloggedJobIDsOfOwner metrics", {
+      _logger.debug("nuqGetBackloggedJobIDsOfOwner metrics", {
         module: "nuq/metrics",
         method: "nuqGetBackloggedJobIDsOfOwner",
         duration: Date.now() - start,
@@ -746,7 +746,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         )
       ).rows.map(row => this.rowToJob(row)!);
     } finally {
-      _logger.info("nuqGetCrawlJobsForListing metrics", {
+      _logger.debug("nuqGetCrawlJobsForListing metrics", {
         module: "nuq/metrics",
         method: "nuqGetCrawlJobsForListing",
         duration: Date.now() - start,
@@ -769,7 +769,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         ).rowCount !== 0
       );
     } finally {
-      _logger.info("nuqRemoveJob metrics", {
+      _logger.debug("nuqRemoveJob metrics", {
         module: "nuq/metrics",
         method: "nuqRemoveJob",
         duration: Date.now() - start,
@@ -795,7 +795,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         ).rowCount ?? 0
       );
     } finally {
-      _logger.info("nuqRemoveJobs metrics", {
+      _logger.debug("nuqRemoveJobs metrics", {
         module: "nuq/metrics",
         method: "nuqRemoveJobs",
         duration: Date.now() - start,
@@ -855,7 +855,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        logger.info("nuqAddJob metrics", {
+        logger.debug("nuqAddJob metrics", {
           module: "nuq/metrics",
           method: "nuqAddJob",
           duration,
@@ -916,7 +916,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        logger.info("nuqAddJob metrics", {
+        logger.debug("nuqAddJob metrics", {
           module: "nuq/metrics",
           method: "nuqAddJob",
           duration,
@@ -1062,7 +1062,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        logger.info("nuqAddJobs metrics", {
+        logger.debug("nuqAddJobs metrics", {
           module: "nuq/metrics",
           method: "nuqAddJobs",
           duration,
@@ -1124,7 +1124,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        logger.info("nuqPromoteJobFromBacklogOrAdd metrics", {
+        logger.debug("nuqPromoteJobFromBacklogOrAdd metrics", {
           module: "nuq/metrics",
           method: "nuqPromoteJobFromBacklogOrAdd",
           duration,
@@ -1270,14 +1270,14 @@ class NuQ<JobData = any, JobReturnValue = any> {
         );
       }
 
-      _logger.info("Prefetched jobs", {
+      _logger.debug("Prefetched jobs", {
         module: "nuq/metrics",
         jobCount: jobs.length,
       });
 
       return jobs.length;
     } finally {
-      _logger.info("nuqPrefetchJobs metrics", {
+      _logger.debug("nuqPrefetchJobs metrics", {
         module: "nuq/metrics",
         method: "nuqPrefetchJobs",
         duration: Date.now() - start,
@@ -1330,7 +1330,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         ).rows[0],
       )!;
     } finally {
-      logger.info("nuqGetJobToProcess metrics", {
+      logger.debug("nuqGetJobToProcess metrics", {
         module: "nuq/metrics",
         method: "nuqGetJobToProcess",
         duration: Date.now() - start,
@@ -1354,7 +1354,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         ).rowCount !== 0
       );
     } finally {
-      _logger.info("nuqRenewLock metrics", {
+      _logger.debug("nuqRenewLock metrics", {
         module: "nuq/metrics",
         method: "nuqRenewLock",
         duration: Date.now() - start,
@@ -1410,7 +1410,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqJobFinish metrics", {
+        _logger.debug("nuqJobFinish metrics", {
           module: "nuq/metrics",
           method: "nuqJobFinish",
           duration,
@@ -1468,7 +1468,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqJobFail metrics", {
+        _logger.debug("nuqJobFail metrics", {
           module: "nuq/metrics",
           method: "nuqJobFail",
           duration,
@@ -1489,7 +1489,7 @@ class NuQ<JobData = any, JobReturnValue = any> {
     const result = await nuqPool.query(`
       SELECT status::text, COUNT(id) as count FROM ${this.queueName} WHERE status IN ('queued', 'active') GROUP BY status
     `);
-    logger.info("nuqGetMetrics metrics", {
+    logger.debug("nuqGetMetrics metrics", {
       module: "nuq/metrics",
       method: "nuqGetMetrics",
       duration: Date.now() - start,
@@ -1618,7 +1618,7 @@ class NuQJobGroup {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqAddGroup metrics", {
+        _logger.debug("nuqAddGroup metrics", {
           module: "nuq/metrics",
           method: "nuqAddGroup",
           duration,
@@ -1660,7 +1660,7 @@ class NuQJobGroup {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqGetGroup metrics", {
+        _logger.debug("nuqGetGroup metrics", {
           module: "nuq/metrics",
           method: "nuqGetGroup",
           duration,
@@ -1699,7 +1699,7 @@ class NuQJobGroup {
         setSpanAttributes(span, {
           "nuq.duration_ms": duration,
         });
-        _logger.info("nuqGetGroup metrics", {
+        _logger.debug("nuqGetGroup metrics", {
           module: "nuq/metrics",
           method: "nuqGetGroupByOwner",
           duration,
@@ -1721,7 +1721,7 @@ export async function nuqHealthCheck(): Promise<boolean> {
   try {
     return (await nuqPool.query("SELECT 1;")).rowCount !== 0;
   } finally {
-    logger.info("nuqHealthCheck metrics", {
+    logger.debug("nuqHealthCheck metrics", {
       module: "nuq/metrics",
       method: "nuqHealthCheck",
       duration: Date.now() - start,
