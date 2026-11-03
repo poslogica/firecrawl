@@ -1,4 +1,4 @@
-import type { ZodTypeAny } from "zod";
+import type { AnyZodSchema } from "../utils/zodSchemaToJson";
 // Public types for Firecrawl JS/TS SDK v2 (camelCase only)
 
 export type FormatString =
@@ -30,7 +30,7 @@ export interface Format {
 export interface JsonFormat extends Format {
   type: "json";
   prompt?: string;
-  schema?: Record<string, unknown> | ZodTypeAny;
+  schema?: Record<string, unknown> | AnyZodSchema;
 }
 
 export interface ScreenshotFormat {
@@ -48,7 +48,7 @@ export interface ChangeTrackingFormat extends Format {
    * auto-converted to JSON Schema by the SDK before being sent — see
    * `utils/validation.ts`.
    */
-  schema?: Record<string, unknown> | ZodTypeAny;
+  schema?: Record<string, unknown> | AnyZodSchema;
   prompt?: string;
   tag?: string;
 }

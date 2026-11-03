@@ -1,13 +1,12 @@
 import { type AgentResponse, type AgentStatusResponse, type AgentWebhookConfig, type AuditMetadata, type ThreatProtectionOptions } from "../types";
 import { HttpClient } from "../utils/httpClient";
 import { normalizeAxiosError, throwForBadResponse } from "../utils/errorHandler";
-import { isZodSchema, zodSchemaToJsonSchema } from "../../utils/zodSchemaToJson";
-import type { ZodTypeAny } from "zod";
+import { isZodSchema, zodSchemaToJsonSchema, type AnyZodSchema } from "../../utils/zodSchemaToJson";
 
 function prepareAgentPayload(args: {
   urls?: string[];
   prompt: string;
-  schema?: Record<string, unknown> | ZodTypeAny;
+  schema?: Record<string, unknown> | AnyZodSchema;
   integration?: string;
   origin?: string;
   maxCredits?: number;

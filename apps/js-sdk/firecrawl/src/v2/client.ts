@@ -86,7 +86,7 @@ import type {
 } from "./types";
 import { Watcher } from "./watcher";
 import type { WatcherOptions } from "./watcher";
-import * as zt from "zod";
+import type { AnyZodSchema, InferZod } from "../utils/zodSchemaToJson";
 
 // Helper types to infer the `json` field from a Zod schema included in `formats`
 type ExtractJsonSchemaFromFormats<Formats> = Formats extends readonly any[]
@@ -94,8 +94,8 @@ type ExtractJsonSchemaFromFormats<Formats> = Formats extends readonly any[]
   : never;
 
 type InferredJsonFromOptions<Opts> = Opts extends { formats?: infer Fmts }
-  ? ExtractJsonSchemaFromFormats<Fmts> extends zt.ZodTypeAny
-    ? zt.infer<ExtractJsonSchemaFromFormats<Fmts>>
+  ? ExtractJsonSchemaFromFormats<Fmts> extends AnyZodSchema
+    ? InferZod<ExtractJsonSchemaFromFormats<Fmts>>
     : unknown
   : unknown;
 
