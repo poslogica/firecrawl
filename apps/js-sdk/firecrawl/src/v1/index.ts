@@ -1,6 +1,5 @@
 import axios, { type AxiosResponse, type AxiosRequestHeaders, AxiosError } from "axios";
-import * as zt from "zod";
-import { zodSchemaToJsonSchema } from "../utils/zodSchemaToJson";
+import { zodSchemaToJsonSchema, type AnyZodSchema, type InferZod } from "../utils/zodSchemaToJson";
 import { TypedEventTarget } from "typescript-event-target";
 
 /**
@@ -171,7 +170,7 @@ export type Action = {
   script: string,
 };
 
-export interface ScrapeParams<LLMSchema extends zt.ZodSchema = any, ActionsSchema extends (Action[] | undefined) = undefined> extends CrawlScrapeOptions {
+export interface ScrapeParams<LLMSchema extends AnyZodSchema = any, ActionsSchema extends (Action[] | undefined) = undefined> extends CrawlScrapeOptions {
   extract?: {
     prompt?: string;
     schema?: LLMSchema;
@@ -347,7 +346,7 @@ export interface AgentOptionsExtract {
   sessionId?: string;
 }
 
-export interface ExtractParams<LLMSchema extends zt.ZodSchema = any> {
+export interface ExtractParams<LLMSchema extends AnyZodSchema = any> {
   prompt?: string;
   schema?: LLMSchema | object;
   systemPrompt?: string;
@@ -364,7 +363,7 @@ export interface ExtractParams<LLMSchema extends zt.ZodSchema = any> {
  * Response interface for extracting information from URLs.
  * Defines the structure of the response received after extracting information from URLs.
  */
-export interface ExtractResponse<LLMSchema extends zt.ZodSchema = any> {
+export interface ExtractResponse<LLMSchema extends AnyZodSchema = any> {
   success: boolean;
   data: LLMSchema;
   error?: string;
@@ -450,7 +449,7 @@ export interface CrawlErrorsResponse {
  * Parameters for deep research operations.
  * Defines options for conducting deep research on a query.
  */
-export interface DeepResearchParams<LLMSchema extends zt.ZodSchema = any>  {
+export interface DeepResearchParams<LLMSchema extends AnyZodSchema = any>  {
   /**
    * Maximum depth of research iterations (1-10)
    * @default 7
@@ -713,10 +712,10 @@ export default class FirecrawlApp {
    * @param params - Additional parameters for the scrape request.
    * @returns The response from the scrape operation.
    */
-  async scrapeUrl<T extends zt.ZodSchema, ActionsSchema extends (Action[] | undefined) = undefined>(
+  async scrapeUrl<T extends AnyZodSchema, ActionsSchema extends (Action[] | undefined) = undefined>(
     url: string,
     params?: ScrapeParams<T, ActionsSchema>
-  ): Promise<ScrapeResponse<zt.infer<T>, ActionsSchema extends Action[] ? ActionsResult : never> | ErrorResponse> {
+  ): Promise<ScrapeResponse<InferZod<T>, ActionsSchema extends Action[] ? ActionsResult : never> | ErrorResponse> {
     const headers: AxiosRequestHeaders = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.apiKey}`,
@@ -1300,7 +1299,7 @@ export default class FirecrawlApp {
    * @deprecated The extract endpoint is in maintenance mode and its use is discouraged.
    * Review https://docs.firecrawl.dev/developer-guides/usage-guides/choosing-the-data-extractor to find a replacement.
    */
-  async extract<T extends zt.ZodSchema = any>(urls?: string[], params?: ExtractParams<T>): Promise<ExtractResponse<zt.infer<T>> | ErrorResponse> {
+  async extract<T extends AnyZodSchema = any>(urls?: string[], params?: ExtractParams<T>): Promise<ExtractResponse<InferZod<T>> | ErrorResponse> {
     const headers = this.prepareHeaders();
 
     let jsonData: { urls?: string[] } & ExtractParams<T> = { urls: urls,  ...params };
@@ -1646,7 +1645,7 @@ export default class FirecrawlApp {
    */
   async deepResearch(
     query: string, 
-    params: DeepResearchParams<zt.ZodSchema>,
+    params: DeepResearchParams<AnyZodSchema>,
     onActivity?: (activity: {
       type: string;
       status: string;
@@ -1732,7 +1731,7 @@ export default class FirecrawlApp {
    * @returns The response containing the research job ID.
    * @deprecated /v1/deep-research is deprecated. Use /v2/search instead.
    */
-  async asyncDeepResearch(query: string, params: DeepResearchParams<zt.ZodSchema>): Promise<DeepResearchResponse | ErrorResponse> {
+  async asyncDeepResearch(query: string, params: DeepResearchParams<AnyZodSchema>): Promise<DeepResearchResponse | ErrorResponse> {
     const headers = this.prepareHeaders();
     let jsonData: any = { query, ...params, origin: typeof (params as any).origin === "string" && (params as any).origin.includes("mcp") ? (params as any).origin : `js-sdk@${this.version}` };
 

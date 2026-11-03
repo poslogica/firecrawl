@@ -2,13 +2,12 @@ import { type ExtractResponse, type ScrapeOptions, type AgentOptions, type Threa
 import { HttpClient } from "../utils/httpClient";
 import { ensureValidScrapeOptions } from "../utils/validation";
 import { normalizeAxiosError, throwForBadResponse } from "../utils/errorHandler";
-import { isZodSchema, zodSchemaToJsonSchema } from "../../utils/zodSchemaToJson";
-import type { ZodTypeAny } from "zod";
+import { isZodSchema, zodSchemaToJsonSchema, type AnyZodSchema } from "../../utils/zodSchemaToJson";
 
 function prepareExtractPayload(args: {
   urls?: string[];
   prompt?: string;
-  schema?: Record<string, unknown> | ZodTypeAny;
+  schema?: Record<string, unknown> | AnyZodSchema;
   systemPrompt?: string;
   allowExternalLinks?: boolean;
   enableWebSearch?: boolean;

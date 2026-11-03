@@ -1,6 +1,16 @@
 import { zodToJsonSchema as zodToJsonSchemaLib } from "zod-to-json-schema";
+import type * as z3 from "zod/v3";
+import { toJSONSchema, type $ZodType, type output } from "zod/v4/core";
 
-type SchemaConverter = (schema: unknown) => unknown;
+/** A schema built with either zod 3 or zod 4 (classic or mini). */
+export type AnyZodSchema = z3.ZodTypeAny | $ZodType;
+
+/** The parsed output type of a zod 3 or zod 4 schema. */
+export type InferZod<T> = T extends $ZodType
+  ? output<T>
+  : T extends z3.ZodTypeAny
+    ? z3.infer<T>
+    : never;
 
 export function isZodSchema(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
@@ -25,10 +35,11 @@ function tryZodV4Conversion(schema: unknown): Record<string, unknown> | null {
   if (!isZodV4Schema(schema)) return null;
 
   try {
-    const zodModule = (schema as Record<string, unknown>).constructor?.prototype?.constructor;
-    if (zodModule && typeof (zodModule as Record<string, unknown>).toJSONSchema === "function") {
-      return (zodModule as { toJSONSchema: SchemaConverter }).toJSONSchema(schema) as Record<string, unknown>;
-    }
+    // draft-7 matches what zod-to-json-schema emits for zod 3 schemas.
+    return toJSONSchema(schema as $ZodType, {
+      target: "draft-7",
+      unrepresentable: "any",
+    }) as Record<string, unknown>;
   } catch {
     // V4 conversion not available
   }
