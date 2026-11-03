@@ -38,7 +38,8 @@ describe("V2 Types Validation", () => {
       expect(result.url).toBe("https://example.com");
       expect(result.origin).toBe("api");
       expect(result.formats).toEqual([{ type: "markdown" }]);
-      expect(result.skipTlsVerification).toBe(true);
+      // TLS certificates are verified unless the caller opts out.
+      expect(result.skipTlsVerification).toBe(false);
     });
 
     it("should preserve explicit skipTlsVerification false", () => {
