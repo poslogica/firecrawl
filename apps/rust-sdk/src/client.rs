@@ -64,11 +64,8 @@ impl Client {
     /// # Arguments
     ///
     /// * `api_url` - The base URL of your Firecrawl instance.
-    /// * `api_key` - Optional API key (required for cloud, optional for self-hosted).
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if using the cloud service without an API key.
+    /// * `api_key` - Optional API key. Without one, the cloud service only
+    ///   allows the keyless free tier (scrape, search, and interact).
     ///
     /// # Example
     ///

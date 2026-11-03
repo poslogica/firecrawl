@@ -94,12 +94,35 @@ describe("V2 Scrape skipTlsVerification Default", () => {
     });
   });
 
+  // v2 verifies TLS certificates unless the caller opts out (86096cf0).
   testIf(!HAS_PROXY)(
-    "should default skipTlsVerification to true in v2 API",
+    "should verify TLS certificates by default in v2 API",
+    async () => {
+      const response = await scrapeRaw(
+        {
+          url: selfSignedUrl,
+          maxAge: 0,
+        },
+        identity,
+      );
+
+      if (response.status !== 500) {
+        console.warn("Non-500 response:", JSON.stringify(response.body));
+      }
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+    },
+    scrapeTimeout,
+  );
+
+  testIf(!HAS_PROXY)(
+    "should allow explicit skipTlsVerification: true opt-out",
     async () => {
       const data = await scrape(
         {
           url: selfSignedUrl,
+          skipTlsVerification: true,
           maxAge: 0,
         },
         identity,

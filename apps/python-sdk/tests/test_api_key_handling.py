@@ -17,9 +17,10 @@ def clear_firecrawl_api_key_env(monkeypatch):
     yield
 
 
-def test_cloud_requires_api_key():
-    with pytest.raises(ValueError):
-        FirecrawlClient(api_url="https://api.firecrawl.dev")
+def test_cloud_allows_missing_api_key_for_keyless_tier():
+    # scrape/search/interact fall back to the keyless free tier
+    client = FirecrawlClient(api_url="https://api.firecrawl.dev")
+    assert client.http_client.api_key is None
 
 
 def test_self_host_allows_missing_api_key():
