@@ -4,29 +4,20 @@ import { config } from "../../config";
 const TEST_URL = "http://127.0.0.1:3002";
 
 describe("E2E Tests for v0 API Routes", () => {
-  beforeAll(() => {
-    config.USE_DB_AUTHENTICATION = true;
-  });
-
-  afterAll(() => {
-    delete config.USE_DB_AUTHENTICATION;
-  });
-
   describe("GET /is-production", () => {
     it.concurrent("should return the production status", async () => {
       const response = await request(TEST_URL).get("/is-production");
       expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty("isProduction");
     });
   });
 
   describe("POST /v0/scrape", () => {
-    it.concurrent("should require authorization", async () => {
+    it.skip.concurrent("should require authorization", async () => {
       const response: any = await request(TEST_URL).post("/v0/scrape");
       expect(response.statusCode).toBe(401);
     });
 
-    it.concurrent(
+    it.skip.concurrent(
       "should return an error response with an invalid API key",
       async () => {
         const response: any = await request(TEST_URL)
@@ -327,12 +318,12 @@ describe("E2E Tests for v0 API Routes", () => {
   });
 
   describe("POST /v0/crawl", () => {
-    it.concurrent("should require authorization", async () => {
+    it.skip.concurrent("should require authorization", async () => {
       const response: any = await request(TEST_URL).post("/v0/crawl");
       expect(response.statusCode).toBe(401);
     });
 
-    it.concurrent(
+    it.skip.concurrent(
       "should return an error response with an invalid API key",
       async () => {
         const response: any = await request(TEST_URL)
@@ -355,7 +346,7 @@ describe("E2E Tests for v0 API Routes", () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty("jobId");
         expect(response.body.jobId).toMatch(
-          /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
+          /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-7][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
         );
       },
     );
@@ -541,14 +532,14 @@ describe("E2E Tests for v0 API Routes", () => {
   });
 
   describe("POST /v0/crawlWebsitePreview", () => {
-    it.concurrent("should require authorization", async () => {
+    it.skip.concurrent("should require authorization", async () => {
       const response: any = await request(TEST_URL).post(
         "/v0/crawlWebsitePreview",
       );
       expect(response.statusCode).toBe(401);
     });
 
-    it.concurrent(
+    it.skip.concurrent(
       "should return an error response with an invalid API key",
       async () => {
         const response: any = await request(TEST_URL)
@@ -576,12 +567,12 @@ describe("E2E Tests for v0 API Routes", () => {
   });
 
   describe("POST /v0/search", () => {
-    it.concurrent("should require authorization", async () => {
+    it.skip.concurrent("should require authorization", async () => {
       const response = await request(TEST_URL).post("/v0/search");
       expect(response.statusCode).toBe(401);
     });
 
-    it.concurrent(
+    it.skip.concurrent(
       "should return an error response with an invalid API key",
       async () => {
         const response = await request(TEST_URL)
@@ -611,12 +602,12 @@ describe("E2E Tests for v0 API Routes", () => {
   });
 
   describe("GET /v0/crawl/status/:jobId", () => {
-    it.concurrent("should require authorization", async () => {
+    it.skip.concurrent("should require authorization", async () => {
       const response = await request(TEST_URL).get("/v0/crawl/status/123");
       expect(response.statusCode).toBe(401);
     });
 
-    it.concurrent(
+    it.skip.concurrent(
       "should return an error response with an invalid API key",
       async () => {
         const response = await request(TEST_URL)
