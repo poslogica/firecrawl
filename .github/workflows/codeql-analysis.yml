@@ -1,0 +1,50 @@
+name: CodeQL Analysis
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/api/src/**/*.ts
+      - apps/api/native/src/**/*.rs
+      - apps/playwright-service-ts/src/**/*.ts
+      - apps/js-sdk/**/*.ts
+      - apps/python-sdk/**/*.py
+      - '!**/*.test.ts'
+      - '!**/*.test.py'
+  schedule:
+    - cron: "0 5 * * 1"  # Weekly: Monday 5am
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+          - python
+          - ruby
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
